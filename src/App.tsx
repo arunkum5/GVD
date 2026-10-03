@@ -13,6 +13,7 @@ import InventoryPage from '@/pages/admin/InventoryPage'
 import QRScanner from '@/pages/scanner/QRScanner'
 import LocationPage from '@/pages/location/LocationPage'
 import { Toaster } from 'sonner'
+import PWAInstallPrompt from '@/components/layout/PWAInstallPrompt'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -39,6 +40,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Toaster position="top-center" richColors theme="dark" />
+      <PWAInstallPrompt />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
