@@ -34,7 +34,20 @@ export const useDataStore = create<DataState>((set, get) => ({
 
       if (error) throw error
       
-      const formattedData = data.map(job => ({
+      const formattedData = data.map(job => {
+        const items = job.job_items?.map((item: any) => ({
+          id: item.id,
+          jobCardId: item.job_card_id,
+          category: item.category,
+          name: item.name,
+          quantity: item.quantity,
+          unitPrice: item.unit_price,
+          totalAmount: item.total
+        })) || []
+
+        const calculatedTotal = items.reduce((sum: number, item: any) => sum + item.totalAmount, 0)
+
+        return {
         id: job.id,
         jobCardNumber: job.job_card_number,
         customerId: job.customer_id,
@@ -52,23 +65,15 @@ export const useDataStore = create<DataState>((set, get) => ({
         totalSpares: job.total_spares,
         totalLabour: job.total_labour,
         totalLubes: job.total_lubes,
-        totalAmount: job.total_amount,
+        totalAmount: calculatedTotal,
         advancePaid: job.advance_paid,
-        balanceAmount: (job.total_amount || 0) - (job.advance_paid || 0),
+        balanceAmount: calculatedTotal - (job.advance_paid || 0),
         deliveryDateTime: job.delivery_date_time,
         isSmsAlertEnabled: job.is_sms_alert_enabled,
         isPaidOnline: job.is_paid_online,
         createdAt: job.created_at,
         updatedAt: job.updated_at,
-        items: job.job_items?.map((item: any) => ({
-          id: item.id,
-          jobCardId: item.job_card_id,
-          category: item.category,
-          name: item.name,
-          quantity: item.quantity,
-          unitPrice: item.unit_price,
-          totalAmount: item.total
-        })) || [],
+        items: items,
         customerName: job.customer_name || job.profiles?.name || 'Unknown',
         customerMobile: job.customer_mobile || job.profiles?.phone || 'Unknown',
       })) as unknown as JobCard[]
