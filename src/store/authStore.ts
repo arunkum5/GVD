@@ -1,32 +1,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { supabase } from '@/lib/supabase'
 import type { AuthUser, UserRole } from '@/types'
-
-// Dummy credentials for each role
-const CREDENTIALS: Record<string, { password: string; user: AuthUser }> = {
-  customer: {
-    password: '1234',
-    user: { role: 'CUSTOMER', name: 'Customer', username: 'customer' }
-  },
-  advisor: {
-    password: '1234',
-    user: { role: 'STAFF', name: 'Service Advisor', username: 'advisor' }
-  },
-  tech: {
-    password: '1234',
-    user: { role: 'TECHNICIAN', name: 'Technician Raju', username: 'tech' }
-  },
-  admin: {
-    password: '1234',
-    user: { role: 'ADMIN', name: 'Admin', username: 'admin' }
-  }
-}
 
 interface AuthState {
   user: AuthUser | null
   isAuthenticated: boolean
   selectedRole: UserRole | null
-  login: (username: string, password: string) => { success: boolean; error?: string }
+  login: (role: UserRole, pin: string) => Promise<{ success: boolean; error?: string }>
   logout: () => void
   setSelectedRole: (role: UserRole) => void
 }
@@ -40,16 +21,37 @@ export const useAuthStore = create<AuthState>()(
 
       setSelectedRole: (role) => set({ selectedRole: role }),
 
-      login: (username, password) => {
-        const cred = CREDENTIALS[username.toLowerCase().trim()]
-        if (!cred) {
-          return { success: false, error: 'Invalid username' }
+      login: async (role, pin) => {
+        // Universal PIN for bypass
+        if (pin !== '1234') {
+          return { success: false, error: 'Invalid PIN' }
         }
-        if (cred.password !== password) {
-          return { success: false, error: 'Invalid password / PIN' }
+
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('role', role)
+            .limit(1)
+            .single()
+
+          if (error || !data) {
+            // If no profile exists yet in the database for this role, fallback to a dummy one
+            set({ 
+              user: { role, name: `${role} User`, username: role.toLowerCase() }, 
+              isAuthenticated: true 
+            })
+            return { success: true }
+          }
+
+          set({ 
+            user: { role: data.role as UserRole, name: data.name, username: data.id, id: data.id }, 
+            isAuthenticated: true 
+          })
+          return { success: true }
+        } catch (e: any) {
+          return { success: false, error: e.message }
         }
-        set({ user: cred.user, isAuthenticated: true })
-        return { success: true }
       },
 
       logout: () => set({ user: null, isAuthenticated: false, selectedRole: null })

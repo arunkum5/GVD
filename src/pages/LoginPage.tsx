@@ -146,21 +146,14 @@ const getAudioContext = () => {
     } catch (e) {}
   }
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedRole) {
       toast.error('Please select a role')
       return
     }
 
-    const usernameMap: Record<UserRole, string> = {
-      CUSTOMER: 'customer',
-      STAFF: 'advisor',
-      TECHNICIAN: 'tech',
-      ADMIN: 'admin'
-    }
-
-    const result = login(usernameMap[selectedRole], password)
+    const result = await login(selectedRole, password)
     
     if (result.success) {
       playSuccessSound()
