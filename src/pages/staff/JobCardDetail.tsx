@@ -54,7 +54,7 @@ export default function JobCardDetail() {
             <h3 className="font-semibold">Current Status</h3>
             <select 
               value={status}
-              onChange={(e) => setStatus(e.target.value)}
+              onChange={(e) => setStatus(e.target.value as any)}
               className="w-full p-2 bg-input border border-border rounded-lg text-foreground font-medium focus:ring-primary focus:border-primary"
             >
               <option value="OPEN">Open (Intake)</option>
