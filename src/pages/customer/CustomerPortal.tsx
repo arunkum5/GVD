@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react'
-import { MOCK_JOB_CARDS, MOCK_REVIEWS, WORKSHOP } from '@/data/mockData'
-import { JobCard } from '@/types'
-import { CheckCircle2, Clock, Wrench, FileText, Star, MessageCircle, Phone } from 'lucide-react'
+import { MOCK_REVIEWS, WORKSHOP } from '@/data/mockData'
+import { useDataStore } from '@/store/dataStore'
+import { CheckCircle2, Clock, Wrench, FileText, Star, MessageCircle, Phone, Loader2 } from 'lucide-react'
 
 export default function CustomerPortal() {
-  const [jobCard, setJobCard] = useState<JobCard | null>(null)
+  const { jobCards, fetchJobCards, isLoading } = useDataStore()
+  const jobCard = jobCards[0] // Pick the latest job card for the customer (for now)
   
   useEffect(() => {
-    // Simulate fetching customer's active job card
-    setJobCard(MOCK_JOB_CARDS[0])
-  }, [])
+    fetchJobCards()
+  }, [fetchJobCards])
 
-  if (!jobCard) return <div className="p-8 text-center">Loading...</div>
+  if (isLoading || !jobCard) return <div className="p-12 text-center text-muted-foreground"><Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />Loading your vehicle status...</div>
 
   const getStatusStep = (status: string) => {
     const steps = ['OPEN', 'IN_PROGRESS', 'QUALITY_CHECK', 'READY', 'COMPLETED']

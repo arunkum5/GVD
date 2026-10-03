@@ -28,7 +28,8 @@ export const useDataStore = create<DataState>((set, get) => ({
         .from('job_cards')
         .select(`
           *,
-          profiles(name, phone)
+          profiles(name, phone),
+          job_items(*)
         `)
         .order('created_at', { ascending: false })
 
