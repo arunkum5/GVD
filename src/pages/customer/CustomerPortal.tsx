@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { MOCK_JOB_CARDS, MOCK_REVIEWS } from '@/data/mockData'
+import { MOCK_JOB_CARDS, MOCK_REVIEWS, WORKSHOP } from '@/data/mockData'
 import { JobCard } from '@/types'
-import { CheckCircle2, Clock, Wrench, FileText, Star } from 'lucide-react'
+import { CheckCircle2, Clock, Wrench, FileText, Star, MessageCircle, Phone } from 'lucide-react'
 
 export default function CustomerPortal() {
   const [jobCard, setJobCard] = useState<JobCard | null>(null)
@@ -115,6 +115,23 @@ export default function CustomerPortal() {
             </div>
           ))}
         </div>
+      </div>
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-24 right-6 flex flex-col gap-3 z-50">
+        <a 
+          href={`https://wa.me/${WORKSHOP.phone.replace(/[^0-9]/g, '')}`} 
+          target="_blank" 
+          rel="noreferrer"
+          className="h-12 w-12 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg hover:-translate-y-1 transition-transform"
+        >
+          <MessageCircle className="h-6 w-6" />
+        </a>
+        <a 
+          href={`tel:${WORKSHOP.phone.replace(/[^0-9]/g, '')}`} 
+          className="h-12 w-12 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg hover:-translate-y-1 transition-transform"
+        >
+          <Phone className="h-6 w-6" />
+        </a>
       </div>
     </div>
   )
