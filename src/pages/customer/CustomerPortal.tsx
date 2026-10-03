@@ -100,6 +100,11 @@ export default function CustomerPortal() {
         </div>
       </div>
 
+      {/* Feedback Section */}
+      {currentStep >= 3 && (
+        <FeedbackSection jobCard={jobCard} reviews={reviews} />
+      )}
+
       {/* Reviews */}
       <div>
         <h2 className="text-xl font-bold mb-4">What others say</h2>
@@ -138,6 +143,85 @@ function StatusStep({ title, desc, active, completed }: { title: string, desc: s
         <h3 className={`font-medium ${active ? 'text-foreground' : 'text-muted-foreground'}`}>{title}</h3>
         <p className="text-sm text-muted-foreground">{desc}</p>
       </div>
+    </div>
+  )
+}
+
+function FeedbackSection({ jobCard, reviews }: { jobCard: any, reviews: any[] }) {
+  const { addReview } = useDataStore()
+  const [rating, setRating] = useState(0)
+  const [hoverRating, setHoverRating] = useState(0)
+  const [comment, setComment] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  const existingReview = reviews.find(r => r.job_card_id === jobCard.id || (r as any).jobCardId === jobCard.id)
+
+  if (existingReview) {
+    return (
+      <div className="bg-primary/10 p-6 rounded-xl border border-primary/20 text-center">
+        <div className="flex justify-center text-primary mb-2">
+          {[...Array(5)].map((_,i) => <Star key={i} className={`h-6 w-6 ${i < existingReview.rating ? 'fill-current' : 'opacity-30'}`} />)}
+        </div>
+        <h3 className="font-bold text-lg text-primary">Thank you for your feedback!</h3>
+        <p className="text-sm text-foreground/80 mt-2">"{existingReview.comment}"</p>
+      </div>
+    )
+  }
+
+  const handleSubmit = async () => {
+    if (rating === 0) return
+    setIsSubmitting(true)
+    try {
+      await addReview({
+        jobCardId: jobCard.id,
+        customerName: jobCard.customerName || 'Customer',
+        rating,
+        comment
+      })
+    } catch (e) {
+      console.error(e)
+    }
+    setIsSubmitting(false)
+  }
+
+  return (
+    <div className="bg-card p-6 rounded-xl border space-y-4">
+      <h2 className="font-semibold flex items-center gap-2">
+        <MessageCircle className="h-5 w-5 text-primary" />
+        Rate your experience
+      </h2>
+      <p className="text-sm text-muted-foreground mb-4">Your vehicle is almost ready! How was our service?</p>
+      
+      <div className="flex gap-2 justify-center py-2">
+        {[1, 2, 3, 4, 5].map(star => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => setRating(star)}
+            onMouseEnter={() => setHoverRating(star)}
+            onMouseLeave={() => setHoverRating(0)}
+            className="p-1 hover:scale-110 transition-transform"
+          >
+            <Star className={`h-8 w-8 ${(hoverRating || rating) >= star ? 'fill-orange-500 text-orange-500' : 'text-muted-foreground'}`} />
+          </button>
+        ))}
+      </div>
+
+      <textarea
+        value={comment}
+        onChange={e => setComment(e.target.value)}
+        placeholder="Any comments or suggestions? (Optional)"
+        className="w-full bg-secondary border border-border rounded-lg p-3 text-sm h-24 resize-none"
+      />
+      
+      <button 
+        onClick={handleSubmit}
+        disabled={rating === 0 || isSubmitting}
+        className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-lg disabled:opacity-50 flex justify-center items-center gap-2"
+      >
+        {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+        Submit Feedback
+      </button>
     </div>
   )
 }

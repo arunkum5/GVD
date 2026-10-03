@@ -66,12 +66,23 @@ CREATE TABLE inspections (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Reviews Table
+CREATE TABLE reviews (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  job_card_id UUID REFERENCES job_cards(id) ON DELETE CASCADE,
+  customer_name TEXT NOT NULL,
+  rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Enable Row Level Security (RLS)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inventory ENABLE ROW LEVEL SECURITY;
 ALTER TABLE job_cards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE job_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inspections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
 
 -- Allow read access for everyone temporarily for testing
 CREATE POLICY "Allow public read" ON profiles FOR SELECT USING (true);
@@ -79,6 +90,7 @@ CREATE POLICY "Allow public read" ON inventory FOR SELECT USING (true);
 CREATE POLICY "Allow public read" ON job_cards FOR SELECT USING (true);
 CREATE POLICY "Allow public read" ON job_items FOR SELECT USING (true);
 CREATE POLICY "Allow public read" ON inspections FOR SELECT USING (true);
+CREATE POLICY "Allow public read" ON reviews FOR SELECT USING (true);
 
 -- Allow insert/update temporarily for testing
 CREATE POLICY "Allow public all" ON profiles FOR ALL USING (true);
@@ -86,3 +98,4 @@ CREATE POLICY "Allow public all" ON inventory FOR ALL USING (true);
 CREATE POLICY "Allow public all" ON job_cards FOR ALL USING (true);
 CREATE POLICY "Allow public all" ON job_items FOR ALL USING (true);
 CREATE POLICY "Allow public all" ON inspections FOR ALL USING (true);
+CREATE POLICY "Allow public all" ON reviews FOR ALL USING (true);

@@ -19,6 +19,7 @@ interface DataState {
   deleteInventoryItem: (id: string | number) => Promise<void>
   reviews: any[]
   fetchReviews: () => Promise<void>
+  addReview: (review: { jobCardId: string, customerName: string, rating: number, comment: string }) => Promise<void>
   profiles: any[]
   fetchProfiles: () => Promise<void>
   addProfile: (profile: any) => Promise<void>
@@ -55,6 +56,25 @@ export const useDataStore = create<DataState>((set, get) => ({
       set({ reviews: formattedData, isLoading: false })
     } catch (err: any) {
       set({ error: err.message, isLoading: false })
+    }
+  },
+
+  addReview: async (review) => {
+    set({ isLoading: true, error: null })
+    try {
+      const { error } = await supabase.from('reviews').insert([{
+        job_card_id: review.jobCardId,
+        customer_name: review.customerName,
+        rating: review.rating,
+        comment: review.comment
+      }])
+      if (error) throw error
+      
+      await get().fetchReviews()
+    } catch (err: any) {
+      console.error('Failed to add review:', err)
+      set({ error: err.message, isLoading: false })
+      throw err
     }
   },
 

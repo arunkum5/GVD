@@ -4,18 +4,23 @@ import { useDataStore } from '@/store/dataStore'
 import { useNavigate } from 'react-router-dom'
 
 export default function AdminDashboard() {
-  const { jobCards, fetchJobCards } = useDataStore()
+  const { jobCards, fetchJobCards, reviews, fetchReviews } = useDataStore()
   const navigate = useNavigate()
 
   useEffect(() => {
     fetchJobCards()
-  }, [fetchJobCards])
+    fetchReviews()
+  }, [fetchJobCards, fetchReviews])
 
   const todayRevenue = jobCards.reduce((sum: number, job: any) => sum + (job.advancePaid || 0), 0)
   const pendingAmount = jobCards.reduce((sum: number, job: any) => sum + (job.balanceAmount || 0), 0)
   
   const readyCount = jobCards.filter((j: any) => j.status === 'READY').length
   const pendingJobsCount = jobCards.filter((j: any) => (j.balanceAmount || 0) > 0).length
+
+  const avgRating = reviews.length > 0 
+    ? (reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : '0.0'
   
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -48,9 +53,9 @@ export default function AdminDashboard() {
         />
         <KpiCard 
           title="Customer Satisfaction" 
-          value="4.8/5" 
+          value={`${avgRating}/5`}
           icon={<Users className="h-5 w-5 text-purple-500" />} 
-          trend="Based on 120 reviews" 
+          trend={`Based on ${reviews.length} reviews`} 
         />
       </div>
 
@@ -88,7 +93,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold">
-              12 Due
+              0 Due
             </span>
           </button>
           
@@ -103,23 +108,31 @@ export default function AdminDashboard() {
               </div>
             </div>
             <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold">
-              5 Pending
+              {pendingJobsCount} Pending
             </span>
           </button>
         </div>
         
-        {/* Recent Reviews (Placeholder) */}
+        {/* Recent Reviews */}
         <div className="bg-card p-6 rounded-xl border">
           <h2 className="text-lg font-bold mb-4">Recent Feedback</h2>
           <div className="space-y-4">
-            <div className="border-l-2 border-green-500 pl-4 py-1">
-              <p className="text-sm">"Excellent service by technician Raju."</p>
-              <p className="text-xs text-muted-foreground mt-1">- Vikram Nair • KA03GH4422</p>
-            </div>
-            <div className="border-l-2 border-green-500 pl-4 py-1">
-              <p className="text-sm">"360 report is very transparent, loved it."</p>
-              <p className="text-xs text-muted-foreground mt-1">- Priya Sharma • KA01MJ5821</p>
-            </div>
+            {reviews.slice(0, 5).map((review: any) => (
+              <div key={review.id} className="border-l-2 border-green-500 pl-4 py-1">
+                <div className="flex items-center gap-1 text-orange-500 mb-1">
+                  {[...Array(review.rating)].map((_, i) => (
+                    <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-sm">"{review.comment}"</p>
+                <p className="text-xs text-muted-foreground mt-1">- {review.customerName}</p>
+              </div>
+            ))}
+            {reviews.length === 0 && (
+              <p className="text-sm text-muted-foreground italic">No feedback received yet.</p>
+            )}
           </div>
         </div>
       </div>
