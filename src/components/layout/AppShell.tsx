@@ -53,10 +53,9 @@ export default function AppShell() {
       {/* Sidebar (Desktop) */}
       <aside className="hidden md:flex w-64 flex-col bg-card border-r border-border">
         <div className="p-6">
-          <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
-            <img src="/logo.webp" alt="GVD Auto World" className="h-8 w-8 object-contain" />
-            GVD Auto
-          </h1>
+          <div className="flex items-center">
+            <img src="/logo.webp" alt="GVD Auto World" className="h-12 w-auto object-contain" />
+          </div>
         </div>
         
         <nav className="flex-1 px-4 space-y-2">
@@ -114,10 +113,9 @@ export default function AppShell() {
       <main className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Mobile Header */}
         <header className="md:hidden flex items-center justify-between p-4 bg-card border-b border-border">
-          <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-            <img src="/logo.webp" alt="GVD Auto World" className="h-8 w-8 object-contain" />
-            GVD Auto
-          </h1>
+          <div className="flex items-center">
+            <img src="/logo.webp" alt="GVD Auto World" className="h-10 w-auto object-contain" />
+          </div>
           <button onClick={handleLogout} className="text-muted-foreground">
             <LogOut className="h-6 w-6" />
           </button>

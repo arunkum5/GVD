@@ -39,10 +39,9 @@ export default function LoginPage() {
     <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <div className="mx-auto h-32 w-32 flex items-center justify-center mb-4 animate-fade-in">
-            <img src="/logo.webp" alt="GVD Auto World" className="w-full h-full object-contain drop-shadow-xl" />
+          <div className="mx-auto h-40 w-auto flex items-center justify-center mb-4 animate-fade-in">
+            <img src="/logo.webp" alt="GVD Auto World" className="h-full object-contain drop-shadow-xl" />
           </div>
-          <h2 className="text-3xl font-bold text-foreground mt-4">GVD Auto World</h2>
         </div>
 
         <form onSubmit={handleLogin} className="mt-8 space-y-6 bg-card p-8 rounded-xl border shadow-2xl glass">
