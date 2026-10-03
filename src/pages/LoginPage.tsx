@@ -42,8 +42,7 @@ export default function LoginPage() {
           <div className="mx-auto h-16 w-16 bg-primary/20 text-primary flex items-center justify-center rounded-2xl mb-4 shadow-lg glow-orange">
             <Wrench className="h-8 w-8" />
           </div>
-          <h2 className="text-3xl font-bold text-foreground">GVD Auto World</h2>
-          <p className="mt-2 text-muted-foreground">Garage Management System</p>
+          <h2 className="text-3xl font-bold text-foreground mt-4">GVD Auto World</h2>
         </div>
 
         <form onSubmit={handleLogin} className="mt-8 space-y-6 bg-card p-8 rounded-xl border shadow-2xl glass">

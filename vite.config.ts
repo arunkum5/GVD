@@ -12,7 +12,7 @@ export default defineConfig({
       manifest: {
         name: 'GVD Auto World',
         short_name: 'GVD Auto',
-        description: 'GVD Auto World — Garage Management System',
+        description: 'GVD Auto World',
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',
