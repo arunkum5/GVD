@@ -39,6 +39,18 @@ export default function CreateJobCard() {
       return
     }
 
+    // Validation
+    const mobileRegex = /^[0-9]{10}$/
+    if (!mobileRegex.test(formData.customerMobile)) {
+      toast.error('Please enter a valid 10-digit mobile number')
+      return
+    }
+
+    if (formData.customerName.length > 25) {
+      toast.error('Customer name must be 25 characters or less')
+      return
+    }
+
     setIsSubmitting(true)
     try {
       const mockJcNum = `JC-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(4, '0')}`
@@ -119,6 +131,19 @@ export default function CreateJobCard() {
                 value={formData.vehicleNumber}
                 onChange={(e) => updateForm('vehicleNumber', e.target.value)}
               />
+              <Input 
+                label="Customer Name *" 
+                placeholder="Rahul Sharma" 
+                value={formData.customerName}
+                onChange={(e) => updateForm('customerName', e.target.value)}
+              />
+              <Input 
+                label="Mobile Number *" 
+                placeholder="9876543210" 
+                type="tel" 
+                value={formData.customerMobile}
+                onChange={(e) => updateForm('customerMobile', e.target.value)}
+              />
               <div className="space-y-1">
                 <label className="text-sm font-medium text-muted-foreground">Vehicle Type</label>
                 <select 
@@ -141,19 +166,6 @@ export default function CreateJobCard() {
                 placeholder="Creta" 
                 value={formData.model}
                 onChange={(e) => updateForm('model', e.target.value)}
-              />
-              <Input 
-                label="Customer Name *" 
-                placeholder="Rahul Sharma" 
-                value={formData.customerName}
-                onChange={(e) => updateForm('customerName', e.target.value)}
-              />
-              <Input 
-                label="Mobile Number *" 
-                placeholder="9876543210" 
-                type="tel" 
-                value={formData.customerMobile}
-                onChange={(e) => updateForm('customerMobile', e.target.value)}
               />
             </div>
           </div>
@@ -293,6 +305,7 @@ function Input({ label, placeholder, type = 'text', uppercase = false, value, on
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        maxLength={type === 'tel' ? 10 : (label.includes('Name') ? 25 : undefined)}
         className={`w-full p-2 bg-input border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary transition ${uppercase ? 'uppercase' : ''}`}
       />
     </div>

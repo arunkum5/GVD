@@ -11,6 +11,7 @@ interface DataState {
   fetchInventory: () => Promise<void>
   addJobCard: (jobCard: Partial<JobCard>) => Promise<void>
   updateJobCardStatus: (id: string, status: JobCard['status']) => Promise<void>
+  addJobItem: (jobCardId: string, item: { name: string, category: string, unitPrice: number, quantity: number, total: number }) => Promise<void>
 }
 
 export const useDataStore = create<DataState>((set, get) => ({
@@ -68,8 +69,8 @@ export const useDataStore = create<DataState>((set, get) => ({
           unitPrice: item.unit_price,
           totalAmount: item.total
         })) || [],
-        customerName: job.profiles?.name || 'Unknown',
-        customerMobile: job.profiles?.phone || 'Unknown',
+        customerName: job.customer_name || job.profiles?.name || 'Unknown',
+        customerMobile: job.customer_mobile || job.profiles?.phone || 'Unknown',
       })) as unknown as JobCard[]
 
       set({ jobCards: formattedData, isLoading: false })
@@ -118,7 +119,6 @@ export const useDataStore = create<DataState>((set, get) => ({
       const { data, error } = await supabase.from('job_cards').insert([dbPayload]).select().single()
       if (error) throw error
 
-      // Refresh the job cards list to include the new one with all joined data
       await get().fetchJobCards()
     } catch (err: any) {
       console.error('Failed to create job card:', err)
@@ -126,7 +126,6 @@ export const useDataStore = create<DataState>((set, get) => ({
       throw err
     }
   },
-
   updateJobCardStatus: async (id, status) => {
     set({ isLoading: true })
     try {
@@ -143,6 +142,28 @@ export const useDataStore = create<DataState>((set, get) => ({
       }))
     } catch (err: any) {
       set({ error: err.message, isLoading: false })
+    }
+  },
+
+  addJobItem: async (jobCardId, item) => {
+    set({ isLoading: true })
+    try {
+      const { error } = await supabase.from('job_items').insert([{
+        job_card_id: jobCardId,
+        name: item.name,
+        category: item.category,
+        unit_price: item.unitPrice,
+        quantity: item.quantity,
+        total: item.total
+      }])
+      if (error) throw error
+      
+      // Update local state by re-fetching
+      await get().fetchJobCards()
+    } catch (err: any) {
+      console.error('Failed to add job item:', err)
+      set({ error: err.message, isLoading: false })
+      throw err
     }
   }
 }))
