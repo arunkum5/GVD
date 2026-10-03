@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react'
-import { MOCK_REVIEWS, WORKSHOP } from '@/data/mockData'
+import { WORKSHOP } from '@/data/mockData'
 import { useDataStore } from '@/store/dataStore'
 import { CheckCircle2, Clock, Wrench, FileText, Star, MessageCircle, Phone, Loader2 } from 'lucide-react'
 
 export default function CustomerPortal() {
-  const { jobCards, fetchJobCards, isLoading } = useDataStore()
+  const { jobCards, fetchJobCards, reviews, fetchReviews, isLoading } = useDataStore()
   const jobCard = jobCards[0] // Pick the latest job card for the customer (for now)
   
   useEffect(() => {
     fetchJobCards()
-  }, [fetchJobCards])
+    fetchReviews()
+  }, [fetchJobCards, fetchReviews])
 
   if (isLoading || !jobCard) return <div className="p-12 text-center text-muted-foreground"><Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />Loading your vehicle status...</div>
 
@@ -103,7 +104,7 @@ export default function CustomerPortal() {
       <div>
         <h2 className="text-xl font-bold mb-4">What others say</h2>
         <div className="grid gap-4 md:grid-cols-2">
-          {MOCK_REVIEWS.slice(0,2).map(review => (
+          {reviews.slice(0, 4).map((review: any) => (
             <div key={review.id} className="bg-card p-4 rounded-xl border">
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex text-orange-500">
@@ -114,6 +115,11 @@ export default function CustomerPortal() {
               <p className="text-sm text-muted-foreground">"{review.comment}"</p>
             </div>
           ))}
+          {reviews.length === 0 && (
+             <div className="col-span-2 text-center p-8 border border-dashed rounded-xl text-muted-foreground">
+                No reviews yet. Be the first to leave one!
+             </div>
+          )}
         </div>
       </div>
     </div>

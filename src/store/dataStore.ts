@@ -14,13 +14,40 @@ interface DataState {
   addJobItem: (jobCardId: string, item: { name: string, category: string, unitPrice: number, quantity: number, total: number }) => Promise<void>
   saveInspection: (jobCardId: string, inspections: any[]) => Promise<void>
   addInventoryItem: (item: any) => Promise<void>
+  reviews: any[]
+  fetchReviews: () => Promise<void>
 }
 
 export const useDataStore = create<DataState>((set, get) => ({
   jobCards: [],
   inventory: [],
+  reviews: [],
   isLoading: false,
   error: null,
+
+  fetchReviews: async () => {
+    set({ isLoading: true, error: null })
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      
+      const formattedData = data.map(item => ({
+        id: item.id,
+        customerName: item.customer_name,
+        rating: item.rating,
+        comment: item.comment,
+        createdAt: item.created_at
+      }))
+
+      set({ reviews: formattedData, isLoading: false })
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false })
+    }
+  },
 
   fetchJobCards: async () => {
     set({ isLoading: true, error: null })
