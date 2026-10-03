@@ -66,6 +66,7 @@ export default function AppShell() {
       case 'ADMIN':
         return [
           { label: 'Admin', path: '/admin', icon: <Settings className="h-5 w-5" /> },
+          { label: 'Employees', path: '/admin/employees', icon: <UserIcon className="h-5 w-5" /> },
           { label: 'Staff View', path: '/staff', icon: <LayoutDashboard className="h-5 w-5" /> },
           { label: 'Inventory', path: '/admin/inventory', icon: <ClipboardList className="h-5 w-5" /> }
         ]
