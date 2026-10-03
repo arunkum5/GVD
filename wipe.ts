@@ -7,19 +7,19 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 async function wipe() {
   console.log('Wiping reviews...')
-  await supabase.from('reviews').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+  await supabase.from('reviews').delete().not('id', 'is', null)
   
   console.log('Wiping inspections...')
-  await supabase.from('inspections').delete().neq('id', 0)
+  await supabase.from('inspections').delete().not('id', 'is', null)
   
   console.log('Wiping job_items...')
-  await supabase.from('job_items').delete().neq('id', 0)
+  await supabase.from('job_items').delete().not('id', 'is', null)
   
   console.log('Wiping job_cards...')
-  await supabase.from('job_cards').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+  await supabase.from('job_cards').delete().not('id', 'is', null)
 
   console.log('Wiping inventory...')
-  await supabase.from('inventory').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+  await supabase.from('inventory').delete().not('id', 'is', null)
   
   console.log('Done.')
 }
