@@ -70,7 +70,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         })) || [],
         customerName: job.profiles?.name || 'Unknown',
         customerMobile: job.profiles?.phone || 'Unknown',
-      })) as JobCard[]
+      })) as unknown as JobCard[]
 
       set({ jobCards: formattedData, isLoading: false })
     } catch (err: any) {
