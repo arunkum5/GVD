@@ -146,14 +146,13 @@ const getAudioContext = () => {
     } catch (e) {}
   }
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const submitLogin = async (pinToSubmit: string) => {
     if (!selectedRole) {
       toast.error('Please select a role')
       return
     }
 
-    const result = await login(selectedRole, password)
+    const result = await login(selectedRole, pinToSubmit)
     
     if (result.success) {
       playSuccessSound()
@@ -162,12 +161,24 @@ const getAudioContext = () => {
     } else {
       playErrorSound()
       toast.error(result.error)
+      setPassword('') // Clear on fail so they can try again instantly
     }
+  }
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await submitLogin(password)
   }
 
   const handlePinClick = (num: string) => {
     if (password.length < 4) {
-      setPassword(prev => prev + num)
+      const newPassword = password + num
+      setPassword(newPassword)
+      
+      // Auto-submit when 4 digits are entered
+      if (newPassword.length === 4) {
+        submitLogin(newPassword)
+      }
     }
   }
 
