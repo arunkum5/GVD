@@ -12,6 +12,7 @@ interface DataState {
   addJobCard: (jobCard: Partial<JobCard>) => Promise<void>
   updateJobCardStatus: (id: string, status: JobCard['status']) => Promise<void>
   addJobItem: (jobCardId: string, item: { name: string, category: string, unitPrice: number, quantity: number, total: number }) => Promise<void>
+  saveInspection: (jobCardId: string, inspections: any[]) => Promise<void>
 }
 
 export const useDataStore = create<DataState>((set, get) => ({
@@ -76,7 +77,8 @@ export const useDataStore = create<DataState>((set, get) => ({
         items: items,
         customerName: job.customer_name || job.profiles?.name || 'Unknown',
         customerMobile: job.customer_mobile || job.profiles?.phone || 'Unknown',
-      })) as unknown as JobCard[]
+        }
+      }) as unknown as JobCard[]
 
       set({ jobCards: formattedData, isLoading: false })
     } catch (err: any) {
@@ -94,7 +96,19 @@ export const useDataStore = create<DataState>((set, get) => ({
 
       if (error) throw error
       
-      set({ inventory: data as any, isLoading: false })
+      const formattedData = data.map(item => ({
+        id: item.id,
+        partName: item.part_name,
+        partNumber: item.part_number,
+        category: item.category,
+        compatibleType: 'FOUR_WHEELER',
+        unitPrice: item.unit_price,
+        stockQuantity: item.stock_quantity,
+        minThresholdAlert: item.min_threshold_alert,
+        unit: 'pcs'
+      })) as any[]
+
+      set({ inventory: formattedData, isLoading: false })
     } catch (err: any) {
       set({ error: err.message, isLoading: false })
     }
@@ -167,6 +181,33 @@ export const useDataStore = create<DataState>((set, get) => ({
       await get().fetchJobCards()
     } catch (err: any) {
       console.error('Failed to add job item:', err)
+      set({ error: err.message, isLoading: false })
+      throw err
+    }
+  },
+
+  saveInspection: async (jobCardId, inspections) => {
+    set({ isLoading: true })
+    try {
+      // Clear existing inspections for this job card just in case of re-save
+      await supabase.from('inspections').delete().eq('job_card_id', jobCardId)
+
+      const payload = inspections.map(i => ({
+        job_card_id: jobCardId,
+        component: i.component,
+        status: i.status,
+        photo_url: i.photoUrl || null,
+        notes: i.notes || null
+      }))
+
+      if (payload.length > 0) {
+        const { error } = await supabase.from('inspections').insert(payload)
+        if (error) throw error
+      }
+      
+      set({ isLoading: false })
+    } catch (err: any) {
+      console.error('Failed to save inspection:', err)
       set({ error: err.message, isLoading: false })
       throw err
     }

@@ -1,11 +1,16 @@
-import { useState } from 'react'
-import { MOCK_INVENTORY } from '@/data/mockData'
+import { useState, useEffect } from 'react'
+import { useDataStore } from '@/store/dataStore'
 import { Search, Plus, AlertTriangle, Upload } from 'lucide-react'
 
 export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState('')
+  const { inventory, fetchInventory } = useDataStore()
 
-  const filteredItems = MOCK_INVENTORY.filter(item => 
+  useEffect(() => {
+    fetchInventory()
+  }, [fetchInventory])
+
+  const filteredItems = inventory.filter((item: any) => 
     item.partName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.partNumber.toLowerCase().includes(searchTerm.toLowerCase())
   )
