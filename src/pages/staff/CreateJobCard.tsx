@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Camera, Upload, Car, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import VoiceRecorder from '@/components/ui/VoiceRecorder'
+import PhotoUploader from '@/components/ui/PhotoUploader'
 
 export default function CreateJobCard() {
   const navigate = useNavigate()
@@ -106,12 +107,14 @@ export default function CreateJobCard() {
             <h2 className="text-lg font-semibold">6-Point Dent & Scratch Photos</h2>
             <p className="text-sm text-muted-foreground">Mandatory before intake to prevent customer disputes.</p>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
               {['Front', 'Rear', 'Left Side', 'Right Side', 'Roof', 'Underbody'].map(angle => (
-                <div key={angle} className="border border-border rounded-lg p-4 bg-secondary/30 flex flex-col items-center justify-center gap-2 h-32 cursor-pointer hover:bg-secondary/50 transition border-dashed">
-                  <Camera className="h-8 w-8 text-muted-foreground" />
-                  <span className="text-sm font-medium">{angle}</span>
-                </div>
+                <PhotoUploader 
+                  key={angle}
+                  label={angle}
+                  onUploadComplete={(url) => console.log(`Uploaded ${angle}:`, url)}
+                  onClear={() => console.log(`Cleared ${angle}`)}
+                />
               ))}
             </div>
             
