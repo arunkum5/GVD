@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { UserRole } from '@/types'
@@ -10,6 +10,34 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
   const { login } = useAuthStore()
+
+  const playEngineSound = () => {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext
+      if (!AudioContext) return
+      const ctx = new AudioContext()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      
+      osc.type = 'sawtooth'
+      osc.frequency.setValueAtTime(40, ctx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.3)
+      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.6)
+      osc.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 1.0)
+      
+      gain.gain.setValueAtTime(0, ctx.currentTime)
+      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.1)
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.2)
+      
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      
+      osc.start()
+      osc.stop(ctx.currentTime + 1.2)
+    } catch (e) {
+      // Silent catch
+    }
+  }
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,48 +53,15 @@ export default function LoginPage() {
       ADMIN: 'admin'
     }
 
+    playEngineSound()
     const result = login(usernameMap[selectedRole], password)
     
     if (result.success) {
       toast.success('Login successful')
-      navigate('/')
+      setTimeout(() => navigate('/'), 600) // Slight delay to hear the engine!
     } else {
       toast.error(result.error)
     }
-  }
-
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const [hasStarted, setHasStarted] = useState(false)
-
-  useEffect(() => {
-    audioRef.current = new Audio('/engine.ogg')
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current.currentTime = 0
-      }
-    }
-  }, [])
-
-  const handleStart = () => {
-    if (audioRef.current) {
-      audioRef.current.play().catch(e => console.log('Audio error:', e))
-    }
-    setHasStarted(true)
-  }
-
-  if (!hasStarted) {
-    return (
-      <div 
-        className="min-h-screen bg-background flex flex-col justify-center items-center p-4 cursor-pointer" 
-        onClick={handleStart}
-      >
-        <div className="mx-auto h-48 w-auto flex items-center justify-center mb-8">
-          <img src="/logo.webp" alt="GVD Auto World" className="h-full object-contain drop-shadow-2xl animate-pulse" />
-        </div>
-        <p className="text-muted-foreground animate-bounce font-medium mt-12 tracking-widest uppercase">Tap anywhere to enter</p>
-      </div>
-    )
   }
 
   return (
@@ -85,28 +80,28 @@ export default function LoginPage() {
               icon={<User />}
               label="Customer"
               selected={selectedRole === 'CUSTOMER'}
-              onClick={() => setSelectedRole('CUSTOMER')}
+              onClick={() => { setSelectedRole('CUSTOMER'); playEngineSound(); }}
             />
             <RoleCard
               role="STAFF"
               icon={<Users />}
               label="Advisor"
               selected={selectedRole === 'STAFF'}
-              onClick={() => setSelectedRole('STAFF')}
+              onClick={() => { setSelectedRole('STAFF'); playEngineSound(); }}
             />
             <RoleCard
               role="TECHNICIAN"
               icon={<Wrench />}
               label="Technician"
               selected={selectedRole === 'TECHNICIAN'}
-              onClick={() => setSelectedRole('TECHNICIAN')}
+              onClick={() => { setSelectedRole('TECHNICIAN'); playEngineSound(); }}
             />
             <RoleCard
               role="ADMIN"
               icon={<Shield />}
               label="Admin"
               selected={selectedRole === 'ADMIN'}
-              onClick={() => setSelectedRole('ADMIN')}
+              onClick={() => { setSelectedRole('ADMIN'); playEngineSound(); }}
             />
           </div>
 

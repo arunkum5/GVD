@@ -22,7 +22,7 @@ export default function AppShell() {
           { label: 'Portal', path: '/customer', icon: <Home className="h-6 w-6" /> },
           { label: 'Location', path: '/location', icon: <MapPin className="h-6 w-6" /> },
           { 
-            label: 'Call', 
+            label: '', 
             path: 'call', 
             href: 'tel:9342851128', 
             icon: (
@@ -32,9 +32,9 @@ export default function AppShell() {
             )
           },
           { 
-            label: 'WhatsApp', 
+            label: '', 
             path: 'wa', 
-            href: 'https://wa.me/919342851128', 
+            href: 'https://wa.me/919342851128?text=Hi!%20GVD%20Auto%20World,%20I%20need%20assistance.', 
             icon: (
               <div className="h-10 w-10 bg-green-500 rounded-full flex items-center justify-center shadow-lg text-white transform hover:scale-110 transition-transform">
                 <svg viewBox="0 0 24 24" className="h-6 w-6 fill-current" xmlns="http://www.w3.org/2000/svg">
