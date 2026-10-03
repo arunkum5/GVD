@@ -39,8 +39,8 @@ export default function LoginPage() {
     <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-primary/20 text-primary flex items-center justify-center rounded-2xl mb-4 shadow-lg glow-orange">
-            <Wrench className="h-8 w-8" />
+          <div className="mx-auto h-32 w-32 flex items-center justify-center mb-4 animate-fade-in">
+            <img src="/logo.png" alt="GVD Auto World" className="w-full h-full object-contain drop-shadow-xl" />
           </div>
           <h2 className="text-3xl font-bold text-foreground mt-4">GVD Auto World</h2>
         </div>
