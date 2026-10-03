@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { UserRole } from '@/types'
-import { Wrench, User, Shield, Users, Lock, LogIn } from 'lucide-react'
+import { Wrench, User, Shield, Users, Lock, LogIn, Delete } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function LoginPage() {
@@ -172,11 +172,21 @@ const getAudioContext = () => {
     }
   }
 
+  const handlePinClick = (num: string) => {
+    if (password.length < 4) {
+      setPassword(prev => prev + num)
+    }
+  }
+
+  const handleBackspace = () => {
+    setPassword(prev => prev.slice(0, -1))
+  }
+
   return (
-    <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4 overflow-hidden">
-      <div className="w-full max-w-md space-y-8 z-10">
+    <div className="min-h-screen bg-background flex flex-col justify-start pt-6 md:pt-12 items-center p-4 overflow-hidden">
+      <div className="w-full max-w-md space-y-6 z-10">
         <div className="text-center">
-          <div className="mx-auto h-40 w-auto flex items-center justify-center mb-4 animate-drive">
+          <div className="mx-auto h-28 w-auto flex items-center justify-center mb-2 animate-drive">
             <img src="/logo.webp" alt="GVD Auto World" className="h-full object-contain drop-shadow-xl" />
           </div>
         </div>
@@ -213,26 +223,56 @@ const getAudioContext = () => {
             />
           </div>
 
-          <div className="relative mt-6">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
-              <Lock className="h-5 w-5" />
+          <div className="mt-6 flex flex-col items-center space-y-6">
+            {/* Visual PIN Dots */}
+            <div className="flex gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`h-4 w-4 rounded-full border-2 transition-all duration-200 ${
+                    i < password.length ? 'bg-primary border-primary shadow-[0_0_8px_rgba(249,115,22,0.6)]' : 'border-border/50 bg-background'
+                  }`} 
+                />
+              ))}
             </div>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="block w-full pl-10 pr-3 py-3 border border-border rounded-lg bg-input text-foreground focus:ring-primary focus:border-primary placeholder-muted-foreground"
-              placeholder="Enter PIN (1234)"
-              required
-            />
+
+            {/* PIN Pad Grid */}
+            <div className="grid grid-cols-3 gap-3 w-full max-w-[280px] mx-auto">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => handlePinClick(num.toString())}
+                  className="h-14 rounded-xl bg-secondary/80 hover:bg-primary/20 hover:text-primary text-xl font-bold flex items-center justify-center transition-all shadow-sm active:scale-95"
+                >
+                  {num}
+                </button>
+              ))}
+              <div /> {/* Empty bottom left */}
+              <button
+                type="button"
+                onClick={() => handlePinClick('0')}
+                className="h-14 rounded-xl bg-secondary/80 hover:bg-primary/20 hover:text-primary text-xl font-bold flex items-center justify-center transition-all shadow-sm active:scale-95"
+              >
+                0
+              </button>
+              <button
+                type="button"
+                onClick={handleBackspace}
+                className="h-14 rounded-xl bg-secondary/40 text-muted-foreground hover:text-foreground hover:bg-secondary flex items-center justify-center transition-all shadow-sm active:scale-95"
+              >
+                <Delete className="h-6 w-6" />
+              </button>
+            </div>
           </div>
 
           <button
             type="submit"
-            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+            disabled={password.length < 4}
+            className="w-full flex justify-center items-center py-4 px-4 mt-2 border border-transparent rounded-xl shadow-lg text-sm font-bold text-primary-foreground bg-primary hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <LogIn className="mr-2 h-5 w-5" />
-            Sign In
+            Enter
           </button>
         </form>
       </div>
