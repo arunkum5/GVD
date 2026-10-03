@@ -111,7 +111,7 @@ export default function AppShell() {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-auto p-4 md:p-8 safe-bottom md:safe-bottom-0 pb-24 md:pb-8">
+        <div className="flex-1 overflow-auto p-4 md:p-8 safe-bottom md:safe-bottom-0 pb-32 md:pb-8">
           <Outlet />
         </div>
 
