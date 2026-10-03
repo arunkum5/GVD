@@ -10,8 +10,10 @@ export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null)
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null)
   const [password, setPassword] = useState('')
+  const [customerMobile, setCustomerMobile] = useState('')
+  const [vehicleNo, setVehicleNo] = useState('')
   const navigate = useNavigate()
-  const { login } = useAuthStore()
+  const { login, customerLogin } = useAuthStore()
   const { profiles, fetchProfiles } = useDataStore()
 
   useEffect(() => {
@@ -140,6 +142,26 @@ export default function LoginPage() {
       setPassword('')
     } else if (selectedRole) {
       setSelectedRole(null)
+      setCustomerMobile('')
+      setVehicleNo('')
+    }
+  }
+
+  const handleCustomerSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!customerMobile || !vehicleNo) {
+      toast.error('Please enter both mobile and vehicle number')
+      return
+    }
+
+    const result = await customerLogin(customerMobile, vehicleNo)
+    if (result.success) {
+      playSuccessSound()
+      toast.success('Login successful')
+      setTimeout(() => navigate('/'), 600)
+    } else {
+      playErrorSound()
+      toast.error(result.error)
     }
   }
 
@@ -194,7 +216,47 @@ export default function LoginPage() {
             </div>
           )}
 
-          {selectedRole && !selectedProfileId && (
+          {selectedRole === 'CUSTOMER' && (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-bold">Customer Portal</h2>
+                <p className="text-muted-foreground mt-1 text-sm">Enter your details to track your vehicle</p>
+              </div>
+              <form onSubmit={handleCustomerSubmit} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-muted-foreground">Mobile Number</label>
+                  <input
+                    type="tel"
+                    required
+                    maxLength={10}
+                    placeholder="e.g. 9876543210"
+                    value={customerMobile}
+                    onChange={(e) => setCustomerMobile(e.target.value.replace(/\D/g, ''))}
+                    className="w-full p-3 bg-secondary/50 border border-border rounded-xl text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-muted-foreground">Vehicle Number</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. KA01MJ5821"
+                    value={vehicleNo}
+                    onChange={(e) => setVehicleNo(e.target.value)}
+                    className="w-full p-3 bg-secondary/50 border border-border rounded-xl text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary transition uppercase"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-xl mt-4 hover:bg-primary/90 transition shadow-lg active:scale-95"
+                >
+                  Track Vehicle
+                </button>
+              </form>
+            </div>
+          )}
+
+          {selectedRole && selectedRole !== 'CUSTOMER' && !selectedProfileId && (
             <div className="space-y-4">
               <h2 className="text-xl font-bold text-center mb-6">Who is logging in?</h2>
               <div className="flex flex-col gap-3">

@@ -7,7 +7,7 @@ interface DataState {
   inventory: InventoryItem[]
   isLoading: boolean
   error: string | null
-  fetchJobCards: () => Promise<void>
+  fetchJobCards: (customerVehicleNo?: string, customerMobile?: string) => Promise<void>
   fetchInventory: () => Promise<void>
   addJobCard: (jobCard: Partial<JobCard>) => Promise<void>
   updateJobCardStatus: (id: string, status: JobCard['status']) => Promise<void>
@@ -129,10 +129,10 @@ export const useDataStore = create<DataState>((set, get) => ({
     }
   },
 
-  fetchJobCards: async () => {
+  fetchJobCards: async (customerVehicleNo?: string, customerMobile?: string) => {
     set({ isLoading: true, error: null })
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('job_cards')
         .select(`
           *,
@@ -141,6 +141,12 @@ export const useDataStore = create<DataState>((set, get) => ({
           inspections(*)
         `)
         .order('created_at', { ascending: false })
+
+      if (customerVehicleNo && customerMobile) {
+        query = query.eq('vehicle_number', customerVehicleNo).eq('customer_mobile', customerMobile)
+      }
+
+      const { data, error } = await query
 
       if (error) throw error
       

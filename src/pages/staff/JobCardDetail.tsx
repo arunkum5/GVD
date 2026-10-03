@@ -56,9 +56,15 @@ export default function JobCardDetail() {
         </div>
         
         <div className="flex gap-2">
-          <button className="p-2 border border-border rounded-lg hover:bg-secondary text-green-500" title="WhatsApp Customer">
+          <a 
+            href={`https://wa.me/91${job.customerMobile}?text=${encodeURIComponent(`Hi ${job.customerName}, track your ${job.make} ${job.model} service here: ${window.location.origin}/login`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 border border-border rounded-lg hover:bg-secondary text-green-500 inline-flex items-center justify-center" 
+            title="WhatsApp Customer"
+          >
             <MessageCircle className="h-5 w-5" />
-          </button>
+          </a>
           <button className="p-2 border border-border rounded-lg hover:bg-secondary" title="Print Invoice">
             <Printer className="h-5 w-5" />
           </button>

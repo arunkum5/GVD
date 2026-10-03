@@ -8,6 +8,7 @@ interface AuthState {
   isAuthenticated: boolean
   selectedRole: UserRole | null
   login: (profileId: string, pin: string, role?: UserRole) => Promise<{ success: boolean; error?: string }>
+  customerLogin: (mobile: string, vehicleNo: string) => Promise<{ success: boolean; error?: string }>
   changePin: (oldPin: string, newPin: string) => Promise<{ success: boolean; error?: string }>
   logout: () => void
   setSelectedRole: (role: UserRole) => void
@@ -48,6 +49,31 @@ export const useAuthStore = create<AuthState>()(
           set({ 
             user: { role: data.role as UserRole, name: data.name, username: data.id }, 
             isAuthenticated: true 
+          })
+          return { success: true }
+        } catch (e: any) {
+          return { success: false, error: e.message }
+        }
+      },
+
+      customerLogin: async (mobile, vehicleNo) => {
+        try {
+          const formattedVehicleNo = vehicleNo.toUpperCase().replace(/\s+/g, '')
+          
+          const { data, error } = await supabase
+            .from('job_cards')
+            .select('customer_name, customer_mobile, vehicle_number')
+            .eq('vehicle_number', formattedVehicleNo)
+            .eq('customer_mobile', mobile)
+            .limit(1)
+            .single()
+
+          if (error || !data) return { success: false, error: 'No service records found for this vehicle and mobile combination.' }
+
+          set({ 
+            user: { role: 'CUSTOMER', name: data.customer_name, username: `${mobile}-${formattedVehicleNo}` }, 
+            isAuthenticated: true,
+            selectedRole: 'CUSTOMER'
           })
           return { success: true }
         } catch (e: any) {
