@@ -37,8 +37,13 @@ export const useAuthStore = create<AuthState>()(
 
           if (error || !data) {
             // If no profile exists yet in the database for this role, fallback to a dummy one
+            let displayName = `${role} User`
+            if (role === 'STAFF') displayName = 'Service Advisor'
+            if (role === 'TECHNICIAN') displayName = 'Technician'
+            if (role === 'ADMIN') displayName = 'Workshop Admin'
+            
             set({ 
-              user: { role, name: `${role} User`, username: role.toLowerCase() }, 
+              user: { role, name: displayName, username: role.toLowerCase() }, 
               isAuthenticated: true 
             })
             return { success: true }
