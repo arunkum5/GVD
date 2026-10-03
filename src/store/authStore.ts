@@ -7,7 +7,7 @@ interface AuthState {
   user: AuthUser | null
   isAuthenticated: boolean
   selectedRole: UserRole | null
-  login: (role: UserRole, pin: string) => Promise<{ success: boolean; error?: string }>
+  login: (profileId: string, pin: string, role?: UserRole) => Promise<{ success: boolean; error?: string }>
   logout: () => void
   setSelectedRole: (role: UserRole) => void
 }
@@ -21,33 +21,28 @@ export const useAuthStore = create<AuthState>()(
 
       setSelectedRole: (role) => set({ selectedRole: role }),
 
-      login: async (role, pin) => {
-        // Universal PIN for bypass
-        if (pin !== '1234') {
-          return { success: false, error: 'Invalid PIN' }
+      login: async (profileId, pin, role) => {
+        if (profileId === 'default_admin') {
+          if (pin === '1234') {
+            set({ 
+              user: { role: 'ADMIN', name: 'Master Admin', username: 'admin' }, 
+              isAuthenticated: true 
+            })
+            return { success: true }
+          }
+          return { success: false, error: 'Invalid master PIN' }
         }
 
         try {
           const { data, error } = await supabase
             .from('profiles')
             .select('*')
-            .eq('role', role)
-            .limit(1)
+            .eq('id', profileId)
             .single()
 
-          if (error || !data) {
-            // If no profile exists yet in the database for this role, fallback to a dummy one
-            let displayName = `${role} User`
-            if (role === 'STAFF') displayName = 'Service Advisor'
-            if (role === 'TECHNICIAN') displayName = 'Technician'
-            if (role === 'ADMIN') displayName = 'Workshop Admin'
-            
-            set({ 
-              user: { role, name: displayName, username: role.toLowerCase() }, 
-              isAuthenticated: true 
-            })
-            return { success: true }
-          }
+          if (error || !data) return { success: false, error: 'Profile not found' }
+          
+          if (data.pin !== pin) return { success: false, error: 'Invalid PIN' }
 
           set({ 
             user: { role: data.role as UserRole, name: data.name, username: data.id }, 

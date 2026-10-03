@@ -1,12 +1,13 @@
 -- Create Enum for Roles
 CREATE TYPE user_role AS ENUM ('CUSTOMER', 'STAFF', 'TECHNICIAN', 'ADMIN');
 
--- Profiles Table (Linked to Auth)
+-- Profiles Table (Decoupled from Auth for PIN login)
 CREATE TABLE profiles (
-  id UUID REFERENCES auth.users(id) PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   role user_role NOT NULL DEFAULT 'CUSTOMER',
   phone TEXT,
+  pin TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

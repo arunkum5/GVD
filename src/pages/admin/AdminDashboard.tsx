@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
 import { TrendingUp, Users, Wrench, IndianRupee, BellRing } from 'lucide-react'
 import { useDataStore } from '@/store/dataStore'
+import { useNavigate } from 'react-router-dom'
 
 export default function AdminDashboard() {
   const { jobCards, fetchJobCards } = useDataStore()
+  const navigate = useNavigate()
 
   useEffect(() => {
     fetchJobCards()
@@ -11,6 +13,9 @@ export default function AdminDashboard() {
 
   const todayRevenue = jobCards.reduce((sum: number, job: any) => sum + (job.advancePaid || 0), 0)
   const pendingAmount = jobCards.reduce((sum: number, job: any) => sum + (job.balanceAmount || 0), 0)
+  
+  const readyCount = jobCards.filter((j: any) => j.status === 'READY').length
+  const pendingJobsCount = jobCards.filter((j: any) => (j.balanceAmount || 0) > 0).length
   
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -25,19 +30,21 @@ export default function AdminDashboard() {
           title="Today's Collection" 
           value={`₹${todayRevenue}`} 
           icon={<IndianRupee className="h-5 w-5 text-green-500" />} 
-          trend="+12% from yesterday" 
+          trend="From active jobs" 
         />
         <KpiCard 
           title="Pending Payments" 
           value={`₹${pendingAmount}`} 
           icon={<TrendingUp className="h-5 w-5 text-orange-500" />} 
-          trend="Needs follow-up" 
+          trend={`${pendingJobsCount} jobs need follow-up`} 
+          onClick={() => navigate('/staff')}
         />
         <KpiCard 
           title="Active Jobs" 
           value={jobCards.length.toString()} 
           icon={<Wrench className="h-5 w-5 text-blue-500" />} 
-          trend="4 ready for delivery" 
+          trend={`${readyCount} ready for delivery`} 
+          onClick={() => navigate('/staff')}
         />
         <KpiCard 
           title="Customer Satisfaction" 
@@ -51,6 +58,24 @@ export default function AdminDashboard() {
         {/* Quick Actions / Triggers */}
         <div className="bg-card p-6 rounded-xl border space-y-4">
           <h2 className="text-lg font-bold">Quick Actions</h2>
+          
+          <button 
+            onClick={() => navigate('/admin/employees')}
+            className="w-full flex items-center justify-between p-4 bg-secondary/50 rounded-xl hover:bg-secondary transition border border-border group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-500/20 p-2 rounded-lg text-blue-500">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="text-left">
+                <p className="font-medium text-foreground group-hover:text-primary transition-colors">Employee Management</p>
+                <p className="text-sm text-muted-foreground">Manage staff roles and access PINs</p>
+              </div>
+            </div>
+            <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold">
+              Manage
+            </span>
+          </button>
           
           <button className="w-full flex items-center justify-between p-4 bg-secondary/50 rounded-xl hover:bg-secondary transition border border-border group">
             <div className="flex items-center gap-3">
@@ -102,9 +127,12 @@ export default function AdminDashboard() {
   )
 }
 
-function KpiCard({ title, value, icon, trend }: { title: string, value: string, icon: React.ReactNode, trend: string }) {
+function KpiCard({ title, value, icon, trend, onClick }: { title: string, value: string, icon: React.ReactNode, trend: string, onClick?: () => void }) {
   return (
-    <div className="bg-card p-5 rounded-xl border border-border hover:border-primary/50 transition-colors">
+    <div 
+      onClick={onClick}
+      className={`bg-card p-5 rounded-xl border border-border transition-colors ${onClick ? 'hover:border-primary/50 cursor-pointer hover:bg-secondary/20' : 'hover:border-primary/30'}`}
+    >
       <div className="flex justify-between items-start mb-2">
         <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
         {icon}

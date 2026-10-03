@@ -1,96 +1,69 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
+import { useDataStore } from '@/store/dataStore'
 import { UserRole } from '@/types'
-import { Wrench, User, Shield, Users, Lock, LogIn, Delete } from 'lucide-react'
+import { Wrench, User, Shield, Users, LogIn, Delete, ChevronLeft } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null)
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null)
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
   const { login } = useAuthStore()
+  const { profiles, fetchProfiles } = useDataStore()
 
-// Singleton AudioContext to prevent hitting the 6-context browser limit when rapidly clicking
-let globalAudioCtx: AudioContext | null = null
-const getAudioContext = () => {
-  if (!globalAudioCtx) {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
-    if (AudioContextClass) globalAudioCtx = new AudioContextClass()
+  useEffect(() => {
+    fetchProfiles()
+  }, [fetchProfiles])
+
+  // Audio logic preserved
+  let globalAudioCtx: AudioContext | null = null
+  const getAudioContext = () => {
+    if (!globalAudioCtx) {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+      if (AudioContextClass) globalAudioCtx = new AudioContextClass()
+    }
+    return globalAudioCtx
   }
-  return globalAudioCtx
-}
 
   const playEngineSound = (role: UserRole) => {
     try {
       const ctx = getAudioContext()
       if (!ctx) return
-      
       if (ctx.state === 'suspended') ctx.resume()
 
       const osc = ctx.createOscillator()
       const filter = ctx.createBiquadFilter()
       const gain = ctx.createGain()
-      
       osc.connect(filter)
       filter.connect(gain)
       gain.connect(ctx.destination)
       
       const now = ctx.currentTime
-      
       if (role === 'CUSTOMER') {
-        // Smooth Sports Car
-        osc.type = 'sawtooth'
-        filter.type = 'lowpass'
-        filter.frequency.value = 800
-        osc.frequency.setValueAtTime(50, now)
-        osc.frequency.exponentialRampToValueAtTime(150, now + 0.4)
-        osc.frequency.exponentialRampToValueAtTime(90, now + 0.8)
-        gain.gain.setValueAtTime(0, now)
-        gain.gain.linearRampToValueAtTime(0.4, now + 0.1)
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0)
+        osc.type = 'sawtooth'; filter.type = 'lowpass'; filter.frequency.value = 800
+        osc.frequency.setValueAtTime(50, now); osc.frequency.exponentialRampToValueAtTime(150, now + 0.4); osc.frequency.exponentialRampToValueAtTime(90, now + 0.8)
+        gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.4, now + 0.1); gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0)
         osc.start(now); osc.stop(now + 1.0)
       } else if (role === 'STAFF') {
-        // Deep V8 Rumble
-        osc.type = 'square'
-        filter.type = 'lowpass'
-        filter.frequency.value = 400
-        osc.frequency.setValueAtTime(40, now)
-        osc.frequency.exponentialRampToValueAtTime(100, now + 0.3)
-        osc.frequency.exponentialRampToValueAtTime(60, now + 0.7)
-        gain.gain.setValueAtTime(0, now)
-        gain.gain.linearRampToValueAtTime(0.5, now + 0.1)
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.9)
+        osc.type = 'square'; filter.type = 'lowpass'; filter.frequency.value = 400
+        osc.frequency.setValueAtTime(40, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.3); osc.frequency.exponentialRampToValueAtTime(60, now + 0.7)
+        gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.5, now + 0.1); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.9)
         osc.start(now); osc.stop(now + 0.9)
       } else if (role === 'TECHNICIAN') {
-        // Aggressive Motorcycle (grittier square wave, audible pitch)
-        osc.type = 'square'
-        filter.type = 'lowpass'
-        filter.frequency.value = 1500
-        osc.frequency.setValueAtTime(50, now)
-        osc.frequency.linearRampToValueAtTime(250, now + 0.2)
-        osc.frequency.linearRampToValueAtTime(150, now + 0.4)
-        osc.frequency.linearRampToValueAtTime(300, now + 0.7)
-        gain.gain.setValueAtTime(0, now)
-        gain.gain.linearRampToValueAtTime(0.3, now + 0.1)
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0)
+        osc.type = 'square'; filter.type = 'lowpass'; filter.frequency.value = 1500
+        osc.frequency.setValueAtTime(50, now); osc.frequency.linearRampToValueAtTime(250, now + 0.2); osc.frequency.linearRampToValueAtTime(150, now + 0.4); osc.frequency.linearRampToValueAtTime(300, now + 0.7)
+        gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.3, now + 0.1); gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0)
         osc.start(now); osc.stop(now + 1.0)
       } else {
-        // ADMIN: Heavy Diesel Truck (Sawtooth at 30-80Hz is very audible on phones)
-        osc.type = 'sawtooth'
-        filter.type = 'lowpass'
-        filter.frequency.value = 500
-        osc.frequency.setValueAtTime(30, now)
-        osc.frequency.linearRampToValueAtTime(80, now + 0.6)
-        osc.frequency.linearRampToValueAtTime(40, now + 1.2)
-        gain.gain.setValueAtTime(0, now)
-        gain.gain.linearRampToValueAtTime(0.6, now + 0.2)
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.4)
+        osc.type = 'sawtooth'; filter.type = 'lowpass'; filter.frequency.value = 500
+        osc.frequency.setValueAtTime(30, now); osc.frequency.linearRampToValueAtTime(80, now + 0.6); osc.frequency.linearRampToValueAtTime(40, now + 1.2)
+        gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.6, now + 0.2); gain.gain.exponentialRampToValueAtTime(0.01, now + 1.4)
         osc.start(now); osc.stop(now + 1.4)
       }
-    } catch (e) {
-      // Silent catch
-    }
+    } catch (e) {}
   }
 
   const playSuccessSound = () => {
@@ -99,24 +72,14 @@ const getAudioContext = () => {
       if (!ctx) return
       if (ctx.state === 'suspended') ctx.resume()
       
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.connect(gain)
-      gain.connect(ctx.destination)
+      const osc = ctx.createOscillator(); const gain = ctx.createGain()
+      osc.connect(gain); gain.connect(ctx.destination)
       
       const now = ctx.currentTime
       osc.type = 'sine'
-      // Bright unlock chime (C5 -> E5 -> G5)
-      osc.frequency.setValueAtTime(523.25, now)
-      osc.frequency.setValueAtTime(659.25, now + 0.15)
-      osc.frequency.setValueAtTime(783.99, now + 0.3)
-      
-      gain.gain.setValueAtTime(0, now)
-      gain.gain.linearRampToValueAtTime(0.5, now + 0.05)
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6)
-      
-      osc.start(now)
-      osc.stop(now + 0.6)
+      osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(659.25, now + 0.15); osc.frequency.setValueAtTime(783.99, now + 0.3)
+      gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.5, now + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6)
+      osc.start(now); osc.stop(now + 0.6)
     } catch (e) {}
   }
 
@@ -126,48 +89,34 @@ const getAudioContext = () => {
       if (!ctx) return
       if (ctx.state === 'suspended') ctx.resume()
       
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.connect(gain)
-      gain.connect(ctx.destination)
+      const osc = ctx.createOscillator(); const gain = ctx.createGain()
+      osc.connect(gain); gain.connect(ctx.destination)
       
       const now = ctx.currentTime
       osc.type = 'sawtooth'
-      // Harsh error buzz
-      osc.frequency.setValueAtTime(150, now)
-      osc.frequency.linearRampToValueAtTime(100, now + 0.3)
-      
-      gain.gain.setValueAtTime(0, now)
-      gain.gain.linearRampToValueAtTime(0.4, now + 0.05)
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3)
-      
-      osc.start(now)
-      osc.stop(now + 0.3)
+      osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.3)
+      gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.4, now + 0.05); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3)
+      osc.start(now); osc.stop(now + 0.3)
     } catch (e) {}
   }
 
   const submitLogin = async (pinToSubmit: string) => {
-    if (!selectedRole) {
-      toast.error('Please select a role')
+    if (!selectedRole || !selectedProfileId) {
+      toast.error('Please select an account')
       return
     }
 
-    const result = await login(selectedRole, pinToSubmit)
+    const result = await login(selectedProfileId, pinToSubmit, selectedRole)
     
     if (result.success) {
       playSuccessSound()
       toast.success('Login successful')
-      setTimeout(() => navigate('/'), 600) // Slight delay to hear the sound!
+      setTimeout(() => navigate('/'), 600)
     } else {
       playErrorSound()
       toast.error(result.error)
-      setPassword('') // Clear on fail so they can try again instantly
+      setPassword('')
     }
-  }
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await submitLogin(password)
   }
 
   const handlePinClick = (num: string) => {
@@ -175,7 +124,6 @@ const getAudioContext = () => {
       const newPassword = password + num
       setPassword(newPassword)
       
-      // Auto-submit when 4 digits are entered
       if (newPassword.length === 4) {
         submitLogin(newPassword)
       }
@@ -186,6 +134,17 @@ const getAudioContext = () => {
     setPassword(prev => prev.slice(0, -1))
   }
 
+  const handleBack = () => {
+    if (selectedProfileId) {
+      setSelectedProfileId(null)
+      setPassword('')
+    } else if (selectedRole) {
+      setSelectedRole(null)
+    }
+  }
+
+  const filteredProfiles = profiles.filter((p: any) => p.role === selectedRole)
+
   return (
     <div className="min-h-screen bg-background flex flex-col justify-start pt-6 md:pt-12 items-center p-4 overflow-hidden">
       <div className="w-full max-w-md space-y-6 z-10">
@@ -195,123 +154,157 @@ const getAudioContext = () => {
           </div>
         </div>
 
-        <form onSubmit={handleLogin} className="mt-8 space-y-6 bg-card p-8 rounded-xl border shadow-2xl glass">
-          <div className="grid grid-cols-2 gap-4">
-            <RoleCard
-              role="CUSTOMER"
-              icon={<User />}
-              label="Customer"
-              selected={selectedRole === 'CUSTOMER'}
-              onClick={() => { setSelectedRole('CUSTOMER'); playEngineSound('CUSTOMER'); }}
-            />
-            <RoleCard
-              role="STAFF"
-              icon={<Users />}
-              label="Advisor"
-              selected={selectedRole === 'STAFF'}
-              onClick={() => { setSelectedRole('STAFF'); playEngineSound('STAFF'); }}
-            />
-            <RoleCard
-              role="TECHNICIAN"
-              icon={<Wrench />}
-              label="Technician"
-              selected={selectedRole === 'TECHNICIAN'}
-              onClick={() => { setSelectedRole('TECHNICIAN'); playEngineSound('TECHNICIAN'); }}
-            />
-            <RoleCard
-              role="ADMIN"
-              icon={<Shield />}
-              label="Admin"
-              selected={selectedRole === 'ADMIN'}
-              onClick={() => { setSelectedRole('ADMIN'); playEngineSound('ADMIN'); }}
-            />
-          </div>
+        <div className="mt-8 bg-card p-8 rounded-xl border shadow-2xl glass">
+          
+          {selectedRole && (
+            <button onClick={handleBack} className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+              <ChevronLeft className="h-4 w-4" /> Back
+            </button>
+          )}
 
-          <div className="mt-6 flex flex-col items-center space-y-6">
-            {/* Visual PIN Dots */}
-            <div className="flex gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div 
-                  key={i} 
-                  className={`h-4 w-4 rounded-full border-2 transition-all duration-200 ${
-                    i < password.length ? 'bg-primary border-primary shadow-[0_0_8px_rgba(249,115,22,0.6)]' : 'border-border/50 bg-background'
-                  }`} 
+          {!selectedRole && (
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold text-center mb-6">Select Your Role</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <RoleCard
+                  role="CUSTOMER"
+                  icon={<User />}
+                  label="Customer"
+                  onClick={() => { setSelectedRole('CUSTOMER'); playEngineSound('CUSTOMER'); }}
                 />
-              ))}
+                <RoleCard
+                  role="STAFF"
+                  icon={<Users />}
+                  label="Advisor"
+                  onClick={() => { setSelectedRole('STAFF'); playEngineSound('STAFF'); }}
+                />
+                <RoleCard
+                  role="TECHNICIAN"
+                  icon={<Wrench />}
+                  label="Technician"
+                  onClick={() => { setSelectedRole('TECHNICIAN'); playEngineSound('TECHNICIAN'); }}
+                />
+                <RoleCard
+                  role="ADMIN"
+                  icon={<Shield />}
+                  label="Admin"
+                  onClick={() => { setSelectedRole('ADMIN'); playEngineSound('ADMIN'); }}
+                />
+              </div>
             </div>
+          )}
 
-            {/* PIN Pad Grid */}
-            <div className="grid grid-cols-3 gap-3 w-full max-w-[280px] mx-auto">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => handlePinClick(num.toString())}
-                  className="h-14 rounded-xl bg-secondary/80 hover:bg-primary/20 hover:text-primary text-xl font-bold flex items-center justify-center transition-all shadow-sm active:scale-95"
-                >
-                  {num}
-                </button>
-              ))}
-              <div /> {/* Empty bottom left */}
-              <button
-                type="button"
-                onClick={() => handlePinClick('0')}
-                className="h-14 rounded-xl bg-secondary/80 hover:bg-primary/20 hover:text-primary text-xl font-bold flex items-center justify-center transition-all shadow-sm active:scale-95"
-              >
-                0
-              </button>
-              <button
-                type="button"
-                onClick={handleBackspace}
-                className="h-14 rounded-xl bg-secondary/40 text-muted-foreground hover:text-foreground hover:bg-secondary flex items-center justify-center transition-all shadow-sm active:scale-95"
-              >
-                <Delete className="h-6 w-6" />
-              </button>
+          {selectedRole && !selectedProfileId && (
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold text-center mb-6">Who is logging in?</h2>
+              <div className="flex flex-col gap-3">
+                {filteredProfiles.length > 0 ? (
+                  filteredProfiles.map((p: any) => (
+                    <button
+                      key={p.id}
+                      onClick={() => setSelectedProfileId(p.id)}
+                      className="w-full text-left p-4 rounded-xl border border-border bg-secondary/50 hover:bg-primary/20 hover:border-primary transition-all font-medium text-lg"
+                    >
+                      {p.name}
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-center p-6 text-muted-foreground bg-secondary/30 rounded-xl border border-border border-dashed">
+                    No accounts found for this role.
+                  </div>
+                )}
+                
+                {selectedRole === 'ADMIN' && (
+                  <button
+                    onClick={() => setSelectedProfileId('default_admin')}
+                    className="w-full text-left p-4 rounded-xl border border-rose-500/50 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 transition-all font-medium text-lg mt-4"
+                  >
+                    Default Master Admin
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
+          {selectedProfileId && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-xl font-bold">Enter PIN</h2>
+                <p className="text-muted-foreground mt-1">
+                  {selectedProfileId === 'default_admin' 
+                    ? 'Master Admin' 
+                    : profiles.find((p: any) => p.id === selectedProfileId)?.name}
+                </p>
+              </div>
 
-        </form>
+              <div className="flex flex-col items-center space-y-6">
+                <div className="flex gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`h-4 w-4 rounded-full border-2 transition-all duration-200 ${
+                        i < password.length ? 'bg-primary border-primary shadow-[0_0_8px_rgba(249,115,22,0.6)]' : 'border-border/50 bg-background'
+                      }`} 
+                    />
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 w-full max-w-[280px] mx-auto">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => handlePinClick(num.toString())}
+                      className="h-14 rounded-xl bg-secondary/80 hover:bg-primary/20 hover:text-primary text-xl font-bold flex items-center justify-center transition-all shadow-sm active:scale-95"
+                    >
+                      {num}
+                    </button>
+                  ))}
+                  <div />
+                  <button
+                    type="button"
+                    onClick={() => handlePinClick('0')}
+                    className="h-14 rounded-xl bg-secondary/80 hover:bg-primary/20 hover:text-primary text-xl font-bold flex items-center justify-center transition-all shadow-sm active:scale-95"
+                  >
+                    0
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBackspace}
+                    className="h-14 rounded-xl bg-secondary/40 text-muted-foreground hover:text-foreground hover:bg-secondary flex items-center justify-center transition-all shadow-sm active:scale-95"
+                  >
+                    <Delete className="h-6 w-6" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </div>
       </div>
     </div>
   )
 }
 
-function RoleCard({ role, icon, label, selected, onClick }: { role: UserRole, icon: React.ReactNode, label: string, selected: boolean, onClick: () => void }) {
+function RoleCard({ role, icon, label, onClick }: { role: UserRole, icon: React.ReactNode, label: string, onClick: () => void }) {
   const getColors = (r: UserRole) => {
     switch (r) {
-      case 'CUSTOMER': return {
-        base: 'border-blue-500/20 bg-blue-500/5 text-blue-500 hover:bg-blue-500/10 hover:border-blue-500/50',
-        active: 'border-blue-500 bg-gradient-to-br from-blue-500/20 to-blue-500/5 text-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)] scale-105'
-      }
-      case 'STAFF': return {
-        base: 'border-purple-500/20 bg-purple-500/5 text-purple-500 hover:bg-purple-500/10 hover:border-purple-500/50',
-        active: 'border-purple-500 bg-gradient-to-br from-purple-500/20 to-purple-500/5 text-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.3)] scale-105'
-      }
-      case 'TECHNICIAN': return {
-        base: 'border-orange-500/20 bg-orange-500/5 text-orange-500 hover:bg-orange-500/10 hover:border-orange-500/50',
-        active: 'border-orange-500 bg-gradient-to-br from-orange-500/20 to-orange-500/5 text-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.3)] scale-105'
-      }
-      case 'ADMIN': return {
-        base: 'border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/50',
-        active: 'border-rose-500 bg-gradient-to-br from-rose-500/20 to-rose-500/5 text-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.3)] scale-105'
-      }
+      case 'CUSTOMER': return 'border-blue-500/20 bg-blue-500/5 text-blue-500 hover:bg-blue-500/10 hover:border-blue-500/50'
+      case 'STAFF': return 'border-purple-500/20 bg-purple-500/5 text-purple-500 hover:bg-purple-500/10 hover:border-purple-500/50'
+      case 'TECHNICIAN': return 'border-orange-500/20 bg-orange-500/5 text-orange-500 hover:bg-orange-500/10 hover:border-orange-500/50'
+      case 'ADMIN': return 'border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/50'
     }
   }
-
-  const colors = getColors(role)
 
   return (
     <div
       onClick={onClick}
-      className={`cursor-pointer p-5 rounded-2xl border flex flex-col items-center justify-center space-y-3 transition-all duration-300 ease-out ${
-        selected ? colors.active : colors.base
-      }`}
+      className={`cursor-pointer p-5 rounded-2xl border flex flex-col items-center justify-center space-y-3 transition-all duration-300 ease-out hover:-translate-y-1 ${getColors(role)}`}
     >
-      <div className={`transform transition-transform duration-300 ${selected ? 'scale-110 drop-shadow-md' : ''}`}>
+      <div className="transform transition-transform duration-300 group-hover:scale-110">
         {icon}
       </div>
-      <span className={`font-bold tracking-wide ${selected ? '' : 'opacity-80'}`}>{label}</span>
+      <span className="font-bold tracking-wide opacity-90">{label}</span>
     </div>
   )
 }

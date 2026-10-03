@@ -9,6 +9,7 @@ import JobCardDetail from '@/pages/staff/JobCardDetail'
 import TechnicianDashboard from '@/pages/technician/TechnicianDashboard'
 import InspectionPage from '@/pages/technician/InspectionPage'
 import AdminDashboard from '@/pages/admin/AdminDashboard'
+import EmployeeManagement from '@/pages/admin/EmployeeManagement'
 import InventoryPage from '@/pages/admin/InventoryPage'
 import QRScanner from '@/pages/scanner/QRScanner'
 import LocationPage from '@/pages/location/LocationPage'
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="technician" element={<RoleRoute roles={['TECHNICIAN', 'ADMIN']}><TechnicianDashboard /></RoleRoute>} />
           <Route path="technician/inspect/:id" element={<RoleRoute roles={['TECHNICIAN', 'ADMIN']}><InspectionPage /></RoleRoute>} />
           <Route path="admin" element={<RoleRoute roles={['ADMIN']}><AdminDashboard /></RoleRoute>} />
+          <Route path="admin/employees" element={<RoleRoute roles={['ADMIN']}><EmployeeManagement /></RoleRoute>} />
           <Route path="admin/inventory" element={<RoleRoute roles={['ADMIN', 'STAFF']}><InventoryPage /></RoleRoute>} />
           <Route path="scanner" element={<ProtectedRoute><QRScanner /></ProtectedRoute>} />
           <Route path="location" element={<LocationPage />} />

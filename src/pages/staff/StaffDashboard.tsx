@@ -22,6 +22,9 @@ export default function StaffDashboard() {
     job.jobCardNumber?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const todayRevenue = jobCards.reduce((sum: number, job: any) => sum + (job.advancePaid || 0), 0)
+  const pendingPayment = jobCards.reduce((sum: number, job: any) => sum + (job.balanceAmount || 0), 0)
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'OPEN': return 'status-open'
@@ -64,8 +67,8 @@ export default function StaffDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard title="Active Jobs" value={jobCards.length.toString()} />
         <StatCard title="Ready Delivery" value={jobCards.filter((j:any) => j.status === 'READY').length.toString()} />
-        <StatCard title="Today's Revenue" value="₹10,900" />
-        <StatCard title="Pending Payment" value="₹8,900" />
+        <StatCard title="Today's Revenue" value={`₹${todayRevenue}`} />
+        <StatCard title="Pending Payment" value={`₹${pendingPayment}`} />
       </div>
 
       {/* Search & Filter */}

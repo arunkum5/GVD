@@ -19,12 +19,18 @@ interface DataState {
   deleteInventoryItem: (id: string | number) => Promise<void>
   reviews: any[]
   fetchReviews: () => Promise<void>
+  profiles: any[]
+  fetchProfiles: () => Promise<void>
+  addProfile: (profile: any) => Promise<void>
+  updateProfile: (id: string, data: any) => Promise<void>
+  deleteProfile: (id: string) => Promise<void>
 }
 
 export const useDataStore = create<DataState>((set, get) => ({
   jobCards: [],
   inventory: [],
   reviews: [],
+  profiles: [],
   isLoading: false,
   error: null,
 
@@ -49,6 +55,57 @@ export const useDataStore = create<DataState>((set, get) => ({
       set({ reviews: formattedData, isLoading: false })
     } catch (err: any) {
       set({ error: err.message, isLoading: false })
+    }
+  },
+
+  fetchProfiles: async () => {
+    set({ isLoading: true, error: null })
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      set({ profiles: data, isLoading: false })
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false })
+    }
+  },
+
+  addProfile: async (profile) => {
+    set({ isLoading: true, error: null })
+    try {
+      const { error } = await supabase.from('profiles').insert([profile])
+      if (error) throw error
+      await get().fetchProfiles()
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false })
+      throw err
+    }
+  },
+
+  updateProfile: async (id, data) => {
+    set({ isLoading: true, error: null })
+    try {
+      const { error } = await supabase.from('profiles').update(data).eq('id', id)
+      if (error) throw error
+      await get().fetchProfiles()
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false })
+      throw err
+    }
+  },
+
+  deleteProfile: async (id) => {
+    set({ isLoading: true, error: null })
+    try {
+      const { error } = await supabase.from('profiles').delete().eq('id', id)
+      if (error) throw error
+      await get().fetchProfiles()
+    } catch (err: any) {
+      set({ error: err.message, isLoading: false })
+      throw err
     }
   },
 
