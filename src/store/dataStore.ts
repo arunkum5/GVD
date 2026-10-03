@@ -14,6 +14,7 @@ interface DataState {
   addJobItem: (jobCardId: string, item: { name: string, category: string, unitPrice: number, quantity: number, total: number }) => Promise<void>
   saveInspection: (jobCardId: string, inspections: any[]) => Promise<void>
   addInventoryItem: (item: any) => Promise<void>
+  bulkAddInventory: (items: any[]) => Promise<void>
   reviews: any[]
   fetchReviews: () => Promise<void>
 }
@@ -158,6 +159,31 @@ export const useDataStore = create<DataState>((set, get) => ({
       await get().fetchInventory()
     } catch (err: any) {
       console.error('Failed to add inventory:', err)
+      set({ error: err.message, isLoading: false })
+      throw err
+    }
+  },
+
+  bulkAddInventory: async (items) => {
+    set({ isLoading: true })
+    try {
+      const payload = items.map(item => ({
+        part_name: item.partName,
+        part_number: item.partNumber || `SKU-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        category: item.category || 'SPARE',
+        unit_price: parseFloat(item.unitPrice) || 0,
+        stock_quantity: parseInt(item.stockQuantity) || 0,
+        min_threshold_alert: parseInt(item.minThresholdAlert) || 5
+      }))
+
+      if (payload.length > 0) {
+        const { error } = await supabase.from('inventory').insert(payload)
+        if (error) throw error
+      }
+      
+      await get().fetchInventory()
+    } catch (err: any) {
+      console.error('Failed to bulk add inventory:', err)
       set({ error: err.message, isLoading: false })
       throw err
     }

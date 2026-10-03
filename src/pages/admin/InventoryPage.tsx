@@ -1,21 +1,90 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useDataStore } from '@/store/dataStore'
-import { Search, Plus, AlertTriangle, Upload, X, Loader2 } from 'lucide-react'
+import { Search, Plus, AlertTriangle, Upload, X, Loader2, Download } from 'lucide-react'
 import { toast } from 'sonner'
+import * as XLSX from 'xlsx'
 
 export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { inventory, fetchInventory } = useDataStore()
+  const [isImporting, setIsImporting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const { inventory, fetchInventory, bulkAddInventory } = useDataStore()
 
   useEffect(() => {
     fetchInventory()
   }, [fetchInventory])
 
   const filteredItems = inventory.filter((item: any) => 
-    item.partName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.partNumber.toLowerCase().includes(searchTerm.toLowerCase())
+    item.partName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.partNumber?.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  const handleExport = () => {
+    try {
+      const exportData = inventory.map((item: any) => ({
+        'Part Name': item.partName,
+        'Part Number': item.partNumber,
+        'Category': item.category,
+        'Unit Price': item.unitPrice,
+        'Stock Quantity': item.stockQuantity,
+        'Low Stock Alert At': item.minThresholdAlert
+      }))
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData)
+      const workbook = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Inventory')
+      
+      XLSX.writeFile(workbook, 'GVD_Inventory_Export.xlsx')
+      toast.success('Inventory exported successfully!')
+    } catch (err) {
+      toast.error('Failed to export inventory')
+    }
+  }
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsImporting(true)
+    try {
+      const reader = new FileReader()
+      reader.onload = async (evt) => {
+        try {
+          const bstr = evt.target?.result
+          const wb = XLSX.read(bstr, { type: 'binary' })
+          const wsname = wb.SheetNames[0]
+          const ws = wb.Sheets[wsname]
+          const data: any[] = XLSX.utils.sheet_to_json(ws)
+
+          const itemsToAdd = data.map(row => ({
+            partName: row['Part Name'] || row['PartName'] || row['part_name'],
+            partNumber: row['Part Number'] || row['PartNumber'] || row['part_number'],
+            category: row['Category'] || row['category'],
+            unitPrice: row['Unit Price'] || row['Price'] || row['unit_price'],
+            stockQuantity: row['Stock Quantity'] || row['Stock'] || row['stock_quantity'],
+            minThresholdAlert: row['Low Stock Alert At'] || row['Alert Threshold'] || 5
+          })).filter(i => i.partName) // Only keep rows with at least a part name
+
+          if (itemsToAdd.length === 0) {
+             throw new Error('No valid parts found in the file. Ensure you have a "Part Name" column.')
+          }
+
+          await bulkAddInventory(itemsToAdd)
+          toast.success(`Successfully imported ${itemsToAdd.length} parts!`)
+        } catch (err: any) {
+          toast.error(err.message || 'Failed to parse Excel file')
+        } finally {
+          setIsImporting(false)
+          if (fileInputRef.current) fileInputRef.current.value = ''
+        }
+      }
+      reader.readAsBinaryString(file)
+    } catch (err) {
+      toast.error('Error reading file')
+      setIsImporting(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -26,8 +95,25 @@ export default function InventoryPage() {
         </div>
         
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 border border-border bg-card px-4 py-2 rounded-lg font-medium hover:bg-secondary transition">
-            <Upload className="h-4 w-4" /> Import Excel
+          <input 
+            type="file" 
+            accept=".xlsx, .xls, .csv" 
+            className="hidden" 
+            ref={fileInputRef}
+            onChange={handleImport}
+          />
+          <button 
+            disabled={isImporting}
+            onClick={() => fileInputRef.current?.click()} 
+            className="flex items-center gap-2 border border-border bg-card px-4 py-2 rounded-lg font-medium hover:bg-secondary transition disabled:opacity-50"
+          >
+            {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} Import
+          </button>
+          <button 
+            onClick={handleExport}
+            className="flex items-center gap-2 border border-border bg-card px-4 py-2 rounded-lg font-medium hover:bg-secondary transition"
+          >
+            <Download className="h-4 w-4" /> Export
           </button>
           <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition">
             <Plus className="h-5 w-5" /> Add Part
