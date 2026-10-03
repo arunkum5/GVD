@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Camera, Upload, Car, Check } from 'lucide-react'
 import { toast } from 'sonner'
+import VoiceRecorder from '@/components/ui/VoiceRecorder'
 
 export default function CreateJobCard() {
   const navigate = useNavigate()
@@ -74,12 +75,18 @@ export default function CreateJobCard() {
               <Input label="Fuel Level (%)" placeholder="50" type="number" />
             </div>
             
-            <div className="space-y-1 mt-4">
+            <div className="space-y-2 mt-4">
               <label className="text-sm font-medium text-muted-foreground">Customer Voice (Complaints)</label>
+              
+              <VoiceRecorder 
+                onUploadComplete={(url) => console.log('Voice uploaded:', url)} 
+                onClear={() => console.log('Voice cleared')} 
+              />
+              
               <textarea 
-                rows={3} 
-                className="w-full p-2 bg-input border border-border rounded-lg text-foreground focus:ring-primary focus:border-primary"
-                placeholder="e.g., Brake noise, oil leak, regular service..."
+                rows={2} 
+                className="w-full p-2 bg-input border border-border rounded-lg text-foreground focus:ring-primary focus:border-primary mt-2"
+                placeholder="Or type text notes (e.g., Brake noise, oil leak...)"
               />
             </div>
             
