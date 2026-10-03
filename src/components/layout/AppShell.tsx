@@ -1,4 +1,5 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { LogOut, Home, ClipboardList, Settings, PenTool, User as UserIcon, LayoutDashboard, QrCode, MapPin, Phone, MessageCircle } from 'lucide-react'
 import { UserRole } from '@/types'
@@ -7,10 +8,15 @@ export default function AppShell() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
+  const [isScrolled, setIsScrolled] = useState(false)
 
   const handleLogout = () => {
     logout()
     navigate('/login')
+  }
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    setIsScrolled(e.currentTarget.scrollTop > 20)
   }
 
   if (!user) return null
@@ -121,10 +127,10 @@ export default function AppShell() {
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-4 py-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+            className="w-full flex items-center space-x-3 px-4 py-2.5 text-rose-500 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg transition-all"
           >
             <LogOut className="h-5 w-5" />
-            <span>Logout</span>
+            <span className="font-bold tracking-wide">Logout</span>
           </button>
         </div>
       </aside>
@@ -132,17 +138,20 @@ export default function AppShell() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Mobile Header */}
-        <header className="md:hidden flex items-center justify-between p-4 bg-card border-b border-border">
+        <header className={`md:hidden flex items-center justify-between bg-card border-b border-border transition-all duration-300 ${isScrolled ? 'p-2 shadow-md' : 'p-4'}`}>
           <div className="flex items-center">
-            <img src="/logo.webp" alt="GVD Auto World" className="h-10 w-auto object-contain" />
+            <img src="/logo.webp" alt="GVD Auto World" className={`w-auto object-contain transition-all duration-300 ${isScrolled ? 'h-7' : 'h-10'}`} />
           </div>
-          <button onClick={handleLogout} className="text-muted-foreground">
-            <LogOut className="h-6 w-6" />
+          <button onClick={handleLogout} className="p-2.5 bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 hover:scale-105 active:scale-95 transition-all rounded-full border border-rose-500/20">
+            <LogOut className={`transition-all duration-300 ${isScrolled ? 'h-4 w-4' : 'h-5 w-5'}`} />
           </button>
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-auto p-4 md:p-8 pb-32 md:pb-8">
+        <div 
+          className="flex-1 overflow-auto p-4 md:p-8 pb-32 md:pb-8"
+          onScroll={handleScroll}
+        >
           <Outlet />
         </div>
 
