@@ -54,17 +54,14 @@ export default function PWAInstallPrompt() {
   return (
     <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-sm animate-slide-up">
       <div className="bg-primary/95 text-primary-foreground backdrop-blur-md p-4 rounded-xl shadow-[0_0_20px_rgba(249,115,22,0.4)] border border-primary/20 flex items-center justify-between gap-4">
-        <div className="flex flex-col">
-          <span className="font-bold text-sm">Install App</span>
-          <span className="text-xs opacity-90">Install GVD Auto for offline access & faster loading</span>
-        </div>
+        <span className="font-bold text-sm ml-1">Install App</span>
         <div className="flex items-center gap-2">
           <button 
             onClick={handleInstallClick}
-            className="bg-white text-primary px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm hover:bg-orange-50 transition"
+            className="bg-white text-primary p-2 rounded-lg text-sm font-bold shadow-sm hover:bg-orange-50 transition"
+            title="Install App"
           >
-            <Download className="h-4 w-4 inline mr-1" />
-            Install
+            <Download className="h-5 w-5" />
           </button>
           <button 
             onClick={() => setIsDismissed(true)}

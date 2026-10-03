@@ -270,14 +270,7 @@ const getAudioContext = () => {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={password.length < 4}
-            className="w-full flex justify-center items-center py-4 px-4 mt-2 border border-transparent rounded-xl shadow-lg text-sm font-bold text-primary-foreground bg-primary hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <LogIn className="mr-2 h-5 w-5" />
-            Enter
-          </button>
+
         </form>
       </div>
     </div>
