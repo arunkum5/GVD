@@ -11,11 +11,24 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const { login } = useAuthStore()
 
+// Singleton AudioContext to prevent hitting the 6-context browser limit when rapidly clicking
+let globalAudioCtx: AudioContext | null = null
+const getAudioContext = () => {
+  if (!globalAudioCtx) {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+    if (AudioContextClass) globalAudioCtx = new AudioContextClass()
+  }
+  return globalAudioCtx
+}
+
   const playEngineSound = () => {
     try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext
-      if (!AudioContext) return
-      const ctx = new AudioContext()
+      const ctx = getAudioContext()
+      if (!ctx) return
+      
+      // Resume context if browser suspended it
+      if (ctx.state === 'suspended') ctx.resume()
+
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
       
