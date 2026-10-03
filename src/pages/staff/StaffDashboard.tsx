@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useDataStore } from '@/store/dataStore'
+import { useAuthStore } from '@/store/authStore'
 import { JobCard } from '@/types'
-import { Plus, Search, Filter, Loader2 } from 'lucide-react'
+import { Plus, Search, Filter, Loader2, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 export default function StaffDashboard() {
   const navigate = useNavigate()
+  const { user } = useAuthStore()
   const [searchTerm, setSearchTerm] = useState('')
-  const { jobCards, fetchJobCards, isLoading } = useDataStore()
+  const { jobCards, fetchJobCards, deleteJobCard, isLoading } = useDataStore()
 
   useEffect(() => {
     fetchJobCards()
@@ -25,6 +28,18 @@ export default function StaffDashboard() {
       case 'IN_PROGRESS': return 'status-inprogress'
       case 'READY': return 'status-ready'
       default: return 'status-closed'
+    }
+  }
+
+  const handleDelete = async (e: React.MouseEvent, id: string | number, jcNumber: string) => {
+    e.stopPropagation() // Prevent row click from navigating
+    if (window.confirm(`Are you sure you want to permanently delete Job Card ${jcNumber}? This action cannot be undone.`)) {
+      try {
+        await deleteJobCard(id)
+        toast.success(`Job Card ${jcNumber} deleted successfully`)
+      } catch (err) {
+        toast.error('Failed to delete job card')
+      }
     }
   }
 
@@ -81,6 +96,7 @@ export default function StaffDashboard() {
                 <th className="p-4 font-medium text-muted-foreground text-sm">Customer</th>
                 <th className="p-4 font-medium text-muted-foreground text-sm">Status</th>
                 <th className="p-4 font-medium text-muted-foreground text-sm">Amount</th>
+                {user?.role === 'ADMIN' && <th className="p-4 font-medium text-muted-foreground text-sm text-right">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -93,7 +109,7 @@ export default function StaffDashboard() {
                 </tr>
               ) : filteredJobs.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                  <td colSpan={user?.role === 'ADMIN' ? 6 : 5} className="p-8 text-center text-muted-foreground">
                     No active job cards found.
                   </td>
                 </tr>
@@ -121,6 +137,17 @@ export default function StaffDashboard() {
                     <td className="p-4 font-medium">
                       ₹{job.totalAmount}
                     </td>
+                    {user?.role === 'ADMIN' && (
+                      <td className="p-4 text-right">
+                        <button 
+                          onClick={(e) => handleDelete(e, job.id, job.jobCardNumber)}
+                          className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition"
+                          title="Delete Job Card"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}

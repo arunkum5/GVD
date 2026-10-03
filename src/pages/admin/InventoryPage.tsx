@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useDataStore } from '@/store/dataStore'
-import { Search, Plus, AlertTriangle, Upload, X, Loader2, Download } from 'lucide-react'
+import { useAuthStore } from '@/store/authStore'
+import { Search, Plus, AlertTriangle, Upload, X, Loader2, Download, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import * as XLSX from 'xlsx'
 
@@ -9,7 +10,8 @@ export default function InventoryPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { inventory, fetchInventory, bulkAddInventory } = useDataStore()
+  const { user } = useAuthStore()
+  const { inventory, fetchInventory, bulkAddInventory, deleteInventoryItem } = useDataStore()
 
   useEffect(() => {
     fetchInventory()
@@ -143,6 +145,7 @@ export default function InventoryPage() {
                 <th className="p-4 font-medium text-muted-foreground text-sm">Category</th>
                 <th className="p-4 font-medium text-muted-foreground text-sm">Price</th>
                 <th className="p-4 font-medium text-muted-foreground text-sm text-right">Stock</th>
+                {user?.role === 'ADMIN' && <th className="p-4 font-medium text-muted-foreground text-sm text-right">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -167,6 +170,26 @@ export default function InventoryPage() {
                         {item.stockQuantity} {item.unit}
                       </div>
                     </td>
+                    {user?.role === 'ADMIN' && (
+                      <td className="p-4 text-right">
+                        <button 
+                          onClick={async () => {
+                            if (window.confirm(`Are you sure you want to delete ${item.partName}?`)) {
+                              try {
+                                await deleteInventoryItem(item.id)
+                                toast.success('Item deleted successfully')
+                              } catch (e) {
+                                toast.error('Failed to delete item')
+                              }
+                            }
+                          }}
+                          className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition"
+                          title="Delete Part"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 )
               })}

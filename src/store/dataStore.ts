@@ -15,6 +15,8 @@ interface DataState {
   saveInspection: (jobCardId: string, inspections: any[]) => Promise<void>
   addInventoryItem: (item: any) => Promise<void>
   bulkAddInventory: (items: any[]) => Promise<void>
+  deleteJobCard: (id: string | number) => Promise<void>
+  deleteInventoryItem: (id: string | number) => Promise<void>
   reviews: any[]
   fetchReviews: () => Promise<void>
 }
@@ -184,6 +186,32 @@ export const useDataStore = create<DataState>((set, get) => ({
       await get().fetchInventory()
     } catch (err: any) {
       console.error('Failed to bulk add inventory:', err)
+      set({ error: err.message, isLoading: false })
+      throw err
+    }
+  },
+
+  deleteInventoryItem: async (id) => {
+    set({ isLoading: true })
+    try {
+      const { error } = await supabase.from('inventory').delete().eq('id', id)
+      if (error) throw error
+      await get().fetchInventory()
+    } catch (err: any) {
+      console.error('Failed to delete inventory:', err)
+      set({ error: err.message, isLoading: false })
+      throw err
+    }
+  },
+
+  deleteJobCard: async (id) => {
+    set({ isLoading: true })
+    try {
+      const { error } = await supabase.from('job_cards').delete().eq('id', id)
+      if (error) throw error
+      await get().fetchJobCards()
+    } catch (err: any) {
+      console.error('Failed to delete job card:', err)
       set({ error: err.message, isLoading: false })
       throw err
     }
