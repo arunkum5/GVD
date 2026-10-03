@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { LogOut, Home, ClipboardList, Settings, PenTool, User as UserIcon, LayoutDashboard, QrCode, MapPin, Phone, MessageCircle } from 'lucide-react'
 import { UserRole } from '@/types'
-import ChangePinModal from './auth/ChangePinModal'
+import ChangePinModal from '../auth/ChangePinModal'
 
 export default function AppShell() {
   const { user, logout } = useAuthStore()
