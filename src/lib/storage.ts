@@ -3,7 +3,8 @@ import imageCompression from 'browser-image-compression'
 
 export const uploadMedia = async (
   file: File,
-  folder: string = 'general'
+  folder: string = 'general',
+  prefix: string = ''
 ): Promise<{ url: string | null; error: string | null }> => {
   try {
     let fileToUpload = file
@@ -25,7 +26,8 @@ export const uploadMedia = async (
 
     // Generate unique filename
     const fileExt = fileToUpload.type.startsWith('image/') ? 'webp' : file.name.split('.').pop()
-    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+    const sanitizedPrefix = prefix ? `${prefix.replace(/[^a-zA-Z0-9]/g, '_')}_` : ''
+    const fileName = `${folder}/${sanitizedPrefix}${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
 
     // Upload to Supabase Storage Bucket ('gvd-media')
     const { data, error } = await supabase.storage

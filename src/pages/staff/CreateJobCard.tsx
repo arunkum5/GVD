@@ -46,6 +46,15 @@ export default function CreateJobCard() {
       return
     }
 
+    const vehicleNumberStr = formData.vehicleNumber.toUpperCase().replace(/\s+/g, '')
+    const standardRegex = /^[A-Z]{2}[0-9]{1,2}[A-Z]{0,3}[0-9]{1,4}$/
+    const bhRegex = /^[0-9]{2}BH[0-9]{4}[A-Z]{1,2}$/
+
+    if (!standardRegex.test(vehicleNumberStr) && !bhRegex.test(vehicleNumberStr)) {
+      toast.error('Invalid Vehicle Number format (e.g. KA03MN2345 or 21BH2345AA)')
+      return
+    }
+
     if (formData.customerName.length > 25) {
       toast.error('Customer name must be 25 characters or less')
       return
@@ -63,7 +72,7 @@ export default function CreateJobCard() {
         jobCardNumber: mockJcNum,
         customerName: formData.customerName,
         customerMobile: formData.customerMobile,
-        vehicleNumber: formData.vehicleNumber.toUpperCase(),
+        vehicleNumber: vehicleNumberStr,
         vehicleType: formData.vehicleType as any,
         make: formData.make,
         model: formData.model,
@@ -223,14 +232,15 @@ export default function CreateJobCard() {
 
         {step === 3 && (
           <div className="space-y-4 animate-fade-in">
-            <h2 className="text-lg font-semibold">6-Point Dent & Scratch Photos</h2>
+            <h2 className="text-lg font-semibold">8-Point Vehicle Photos</h2>
             <p className="text-sm text-muted-foreground">Mandatory before intake to prevent customer disputes.</p>
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-              {['Front', 'Rear', 'Left Side', 'Right Side', 'Roof', 'Underbody'].map(angle => (
+              {['Front', 'Rear', 'Left Side', 'Right Side', 'Roof', 'Underbody', 'Dashcam', 'Other'].map(angle => (
                 <PhotoUploader 
                   key={angle}
                   label={angle}
+                  prefix={formData.vehicleNumber}
                   onUploadComplete={(url) => setDentPhotos(prev => ({ ...prev, [angle]: url }))}
                   onClear={() => {
                     const newPhotos = { ...dentPhotos }

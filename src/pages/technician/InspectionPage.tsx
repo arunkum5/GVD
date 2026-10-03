@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { INSPECTION_COMPONENTS } from '@/data/mockData'
 import { Camera, Check, X, CheckCircle2, ChevronLeft, Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useDataStore } from '@/store/dataStore'
+import { uploadMedia } from '@/lib/storage'
 
 export default function InspectionPage() {
   const { id } = useParams()
@@ -12,18 +13,33 @@ export default function InspectionPage() {
   
   const job = jobCards.find((j: any) => j.id.toString() === id)
   const [activeCategory, setActiveCategory] = useState('ENGINE')
-  const [inspections, setInspections] = useState<Record<string, { status: string, notes: string }>>({})
+  const [inspections, setInspections] = useState<Record<string, { status: string, notes: string, photoUrl?: string | null }>>(() => {
+    const initial: Record<string, { status: string, notes: string, photoUrl?: string | null }> = {}
+    if (job?.inspections) {
+      job.inspections.forEach((i: any) => {
+        initial[i.component] = { status: i.status, notes: i.notes, photoUrl: i.photo_url }
+      })
+    }
+    return initial
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   // Group components by category
   const categories = [...new Set(INSPECTION_COMPONENTS.map(c => c.category))]
   const currentComponents = INSPECTION_COMPONENTS.filter(c => c.category === activeCategory)
 
-  const handleUpdate = (componentKey: string, status: string, notes: string) => {
-    setInspections(prev => ({
-      ...prev,
-      [componentKey]: { status, notes }
-    }))
+  const handleUpdate = (componentKey: string, status: string, notes: string, photoUrl?: string | null) => {
+    setInspections(prev => {
+      const current = prev[componentKey] || {}
+      return {
+        ...prev,
+        [componentKey]: { 
+          status, 
+          notes, 
+          photoUrl: photoUrl !== undefined ? photoUrl : current.photoUrl 
+        }
+      }
+    })
   }
 
   const handleSave = async () => {
@@ -37,7 +53,8 @@ export default function InspectionPage() {
       const payload = Object.entries(inspections).map(([key, val]) => ({
         component: key,
         status: val.status,
-        notes: val.notes
+        notes: val.notes,
+        photoUrl: val.photoUrl || null
       }))
 
       await saveInspection(job.id.toString(), payload)
@@ -95,7 +112,8 @@ export default function InspectionPage() {
             key={comp.componentKey} 
             component={comp} 
             value={inspections[comp.componentKey]}
-            onChange={(status, notes) => handleUpdate(comp.componentKey, status, notes)}
+            onChange={(status, notes, photoUrl) => handleUpdate(comp.componentKey, status, notes, photoUrl)}
+            vehicleNumber={job.vehicleNumber}
           />
         ))}
       </div>
@@ -103,9 +121,26 @@ export default function InspectionPage() {
   )
 }
 
-function InspectionItem({ component, value, onChange }: { component: any, value: { status: string, notes: string } | undefined, onChange: (status: string, notes: string) => void }) {
+function InspectionItem({ component, value, onChange, vehicleNumber }: { component: any, value: { status: string, notes: string, photoUrl?: string | null } | undefined, onChange: (status: string, notes: string, photoUrl?: string | null) => void, vehicleNumber: string }) {
   const status = value?.status || null
   const notes = value?.notes || ''
+  const photoUrl = value?.photoUrl || null
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploading, setIsUploading] = useState(false)
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setIsUploading(true)
+    const { url, error } = await uploadMedia(file, 'inspections', vehicleNumber)
+    setIsUploading(false)
+    if (url) {
+      onChange(status || 'GOOD', notes, url)
+      toast.success('Photo attached')
+    } else {
+      toast.error('Failed to upload photo: ' + error)
+    }
+  }
 
   return (
     <div className="bg-card border border-border p-4 rounded-xl space-y-4">
@@ -115,9 +150,28 @@ function InspectionItem({ component, value, onChange }: { component: any, value:
           <p className="text-xs text-muted-foreground">Angle: {component.angle.replace('_', ' ')}</p>
         </div>
         
-        <button className="h-10 w-10 rounded-full border border-dashed border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors bg-secondary/50">
-          <Camera className="h-5 w-5" />
-        </button>
+        <div>
+          <input type="file" accept="image/*" capture="environment" className="hidden" ref={fileInputRef} onChange={handleFileSelect} />
+          {photoUrl ? (
+            <div className="relative h-12 w-12 rounded-lg overflow-hidden group border border-primary">
+              <img src={photoUrl} alt="Inspection" className="w-full h-full object-cover" />
+              <button 
+                onClick={() => onChange(status || 'GOOD', notes, null)}
+                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="h-10 w-10 rounded-full border border-dashed border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors bg-secondary/50 disabled:opacity-50"
+            >
+              {isUploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Status Toggles */}

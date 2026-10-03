@@ -48,7 +48,7 @@ export default function App() {
           <Route path="customer" element={<CustomerPortal />} />
           <Route path="staff" element={<RoleRoute roles={['STAFF', 'ADMIN']}><StaffDashboard /></RoleRoute>} />
           <Route path="staff/job-cards/new" element={<RoleRoute roles={['STAFF', 'ADMIN']}><CreateJobCard /></RoleRoute>} />
-          <Route path="staff/job-cards/:id" element={<RoleRoute roles={['STAFF', 'ADMIN']}><JobCardDetail /></RoleRoute>} />
+          <Route path="staff/job-cards/:id" element={<RoleRoute roles={['STAFF', 'ADMIN', 'TECHNICIAN']}><JobCardDetail /></RoleRoute>} />
           <Route path="technician" element={<RoleRoute roles={['TECHNICIAN', 'ADMIN']}><TechnicianDashboard /></RoleRoute>} />
           <Route path="technician/inspect/:id" element={<RoleRoute roles={['TECHNICIAN', 'ADMIN']}><InspectionPage /></RoleRoute>} />
           <Route path="admin" element={<RoleRoute roles={['ADMIN']}><AdminDashboard /></RoleRoute>} />

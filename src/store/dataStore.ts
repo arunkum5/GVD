@@ -60,7 +60,8 @@ export const useDataStore = create<DataState>((set, get) => ({
         .select(`
           *,
           profiles(name, phone),
-          job_items(*)
+          job_items(*),
+          inspections(*)
         `)
         .order('created_at', { ascending: false })
 
@@ -106,6 +107,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         createdAt: job.created_at,
         updatedAt: job.updated_at,
         items: items,
+        inspections: job.inspections || [],
         customerName: job.customer_name || job.profiles?.name || 'Unknown',
         customerMobile: job.customer_mobile || job.profiles?.phone || 'Unknown',
         }

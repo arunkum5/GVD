@@ -8,9 +8,10 @@ interface PhotoUploaderProps {
   onUploadComplete: (url: string) => void
   onClear: () => void
   existingUrl?: string
+  prefix?: string
 }
 
-export default function PhotoUploader({ label, onUploadComplete, onClear, existingUrl }: PhotoUploaderProps) {
+export default function PhotoUploader({ label, onUploadComplete, onClear, existingUrl, prefix = '' }: PhotoUploaderProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [photoUrl, setPhotoUrl] = useState<string | null>(existingUrl || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -22,7 +23,7 @@ export default function PhotoUploader({ label, onUploadComplete, onClear, existi
     setIsUploading(true)
     
     // Upload to Supabase and compress
-    const { url, error } = await uploadMedia(file, 'dent_photos')
+    const { url, error } = await uploadMedia(file, 'dent_photos', prefix)
     
     setIsUploading(false)
     
