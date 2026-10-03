@@ -13,8 +13,11 @@ export default function CreateJobCard() {
   const handlePrev = () => setStep(s => Math.max(s - 1, 1))
 
   const handleSave = () => {
-    toast.success('Job Card Created Successfully', {
-      description: 'Vehicle checked in. SMS sent to customer.'
+    // Generate a quick mock job card number for the UI
+    const mockJcNum = `JC-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(4, '0')}`
+    
+    toast.success(`Job Card Created: ${mockJcNum}`, {
+      description: 'Vehicle checked in.'
     })
     navigate('/staff/job-cards/1') // Navigate to mock job card
   }
