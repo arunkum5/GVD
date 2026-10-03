@@ -45,7 +45,7 @@ export const useAuthStore = create<AuthState>()(
           }
 
           set({ 
-            user: { role: data.role as UserRole, name: data.name, username: data.id, id: data.id }, 
+            user: { role: data.role as UserRole, name: data.name, username: data.id }, 
             isAuthenticated: true 
           })
           return { success: true }
