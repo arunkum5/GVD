@@ -30,9 +30,9 @@ export default function JobCardDetail() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-6 rounded-xl border">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">{job.job_card_number}</h1>
+            <h1 className="text-2xl font-bold">{job.jobCardNumber}</h1>
             <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-bold tracking-wider">
-              {job.vehicle_number}
+              {job.vehicleNumber}
             </span>
           </div>
           <p className="text-muted-foreground mt-1">{job.make} {job.model} • {job.customerName}</p>
@@ -70,8 +70,8 @@ export default function JobCardDetail() {
             </select>
             
             <div className="pt-4 border-t border-border">
-              <p className="text-sm text-muted-foreground">Odometer: <span className="text-foreground font-medium">{job.odometer_km || 0} km</span></p>
-              <p className="text-sm text-muted-foreground mt-1">Fuel: <span className="text-foreground font-medium">{job.fuel_level_percent || 0}%</span></p>
+              <p className="text-sm text-muted-foreground">Odometer: <span className="text-foreground font-medium">{job.odometerKm || 0} km</span></p>
+              <p className="text-sm text-muted-foreground mt-1">Fuel: <span className="text-foreground font-medium">{job.fuelLevelPercent || 0}%</span></p>
             </div>
           </div>
 
@@ -79,11 +79,11 @@ export default function JobCardDetail() {
           <div className="bg-card p-5 rounded-xl border space-y-4">
             <div>
               <h3 className="font-semibold text-sm text-muted-foreground">Customer Complaints</h3>
-              <p className="mt-1 text-sm">{job.customer_voice || 'None recorded'}</p>
+              <p className="mt-1 text-sm">{job.customerVoice || 'None recorded'}</p>
             </div>
             <div className="pt-3 border-t border-border">
               <h3 className="font-semibold text-sm text-muted-foreground">Dent Notes</h3>
-              <p className="mt-1 text-sm">{job.dent_notes || 'None recorded'}</p>
+              <p className="mt-1 text-sm">{job.dentNotes || 'None recorded'}</p>
             </div>
           </div>
         </div>
@@ -107,7 +107,7 @@ export default function JobCardDetail() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {job.job_items?.map((item: any) => (
+                {job.items?.map((item: any) => (
                   <tr key={item.id} className="hover:bg-secondary/50 transition">
                     <td className="p-4">
                       <div className="font-medium">{item.name}</div>
@@ -116,11 +116,11 @@ export default function JobCardDetail() {
                     <td className="p-4">
                       <span className="text-xs px-2 py-1 bg-secondary rounded-md">{item.category}</span>
                     </td>
-                    <td className="p-4 text-right font-medium">₹{item.total}</td>
+                    <td className="p-4 text-right font-medium">₹{item.totalAmount}</td>
                   </tr>
                 ))}
                 
-                {(!job.job_items || job.job_items.length === 0) && (
+                {(!job.items || job.items.length === 0) && (
                   <tr>
                     <td colSpan={3} className="p-8 text-center text-muted-foreground">
                       No items added yet. Click 'Add Item' to build the estimate.
@@ -133,23 +133,23 @@ export default function JobCardDetail() {
             <div className="p-5 bg-secondary/10 border-t border-border space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Spares Total</span>
-                <span>₹{job.total_spares || 0}</span>
+                <span>₹{job.totalSpares || 0}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Labour Total</span>
-                <span>₹{job.total_labour || 0}</span>
+                <span>₹{job.totalLabour || 0}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Lubes & Fluids</span>
-                <span>₹{job.total_lubes || 0}</span>
+                <span>₹{job.totalLubes || 0}</span>
               </div>
               <div className="flex justify-between text-sm pt-2 border-t border-border">
                 <span className="text-muted-foreground">Advance Paid</span>
-                <span className="text-green-500">- ₹{job.advance_paid || 0}</span>
+                <span className="text-green-500">- ₹{job.advancePaid || 0}</span>
               </div>
               <div className="flex justify-between text-lg font-bold pt-2 border-t border-border mt-2">
                 <span>Balance Due</span>
-                <span className="text-primary">₹{(job.total_amount || 0) - (job.advance_paid || 0)}</span>
+                <span className="text-primary">₹{job.balanceAmount || 0}</span>
               </div>
               
               <div className="mt-4 pt-4 border-t border-border flex justify-end">

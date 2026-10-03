@@ -14,9 +14,9 @@ export default function StaffDashboard() {
   }, [fetchJobCards])
 
   const filteredJobs = jobCards.filter((job: any) => 
-    job.vehicle_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    job.vehicleNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     job.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    job.job_card_number?.toLowerCase().includes(searchTerm.toLowerCase())
+    job.jobCardNumber?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const getStatusBadge = (status: string) => {
@@ -104,9 +104,9 @@ export default function StaffDashboard() {
                     onClick={() => navigate(`/staff/job-cards/${job.id}`)}
                     className="hover:bg-secondary/50 cursor-pointer transition-colors"
                   >
-                    <td className="p-4 font-medium">{job.job_card_number}</td>
+                    <td className="p-4 font-medium">{job.jobCardNumber}</td>
                     <td className="p-4">
-                      <div className="font-medium text-primary">{job.vehicle_number}</div>
+                      <div className="font-medium text-primary">{job.vehicleNumber}</div>
                       <div className="text-xs text-muted-foreground">{job.make} {job.model}</div>
                     </td>
                     <td className="p-4">
@@ -119,7 +119,7 @@ export default function StaffDashboard() {
                       </span>
                     </td>
                     <td className="p-4 font-medium">
-                      ₹{job.total_amount}
+                      ₹{job.totalAmount}
                     </td>
                   </tr>
                 ))

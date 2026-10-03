@@ -1,11 +1,10 @@
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
-import type { JobCard, InventoryItem, InspectionItem } from '@/types'
+import type { JobCard, InventoryItem } from '@/types'
 
 interface DataState {
   jobCards: JobCard[]
   inventory: InventoryItem[]
-  inspections: Record<string, InspectionItem[]> // Keyed by job_card_id
   isLoading: boolean
   error: string | null
   fetchJobCards: () => Promise<void>
@@ -17,7 +16,6 @@ interface DataState {
 export const useDataStore = create<DataState>((set, get) => ({
   jobCards: [],
   inventory: [],
-  inspections: {},
   isLoading: false,
   error: null,
 
@@ -35,12 +33,44 @@ export const useDataStore = create<DataState>((set, get) => ({
 
       if (error) throw error
       
-      // Transform data if necessary to match types
       const formattedData = data.map(job => ({
-        ...job,
+        id: job.id,
+        jobCardNumber: job.job_card_number,
+        customerId: job.customer_id,
+        vehicleNumber: job.vehicle_number,
+        vehicleType: job.vehicle_type,
+        make: job.make,
+        model: job.model,
+        variant: job.variant,
+        odometerKm: job.odometer_km,
+        fuelLevelPercent: job.fuel_level_percent,
+        accessoriesNotes: job.accessories_notes,
+        customerVoice: job.customer_voice,
+        dentNotes: job.dent_notes,
+        status: job.status,
+        totalSpares: job.total_spares,
+        totalLabour: job.total_labour,
+        totalLubes: job.total_lubes,
+        totalAmount: job.total_amount,
+        advancePaid: job.advance_paid,
+        balanceAmount: (job.total_amount || 0) - (job.advance_paid || 0),
+        deliveryDateTime: job.delivery_date_time,
+        isSmsAlertEnabled: job.is_sms_alert_enabled,
+        isPaidOnline: job.is_paid_online,
+        createdAt: job.created_at,
+        updatedAt: job.updated_at,
+        items: job.job_items?.map((item: any) => ({
+          id: item.id,
+          jobCardId: item.job_card_id,
+          category: item.category,
+          name: item.name,
+          quantity: item.quantity,
+          unitPrice: item.unit_price,
+          totalAmount: item.total
+        })) || [],
         customerName: job.profiles?.name || 'Unknown',
         customerMobile: job.profiles?.phone || 'Unknown',
-      })) as any
+      })) as JobCard[]
 
       set({ jobCards: formattedData, isLoading: false })
     } catch (err: any) {
