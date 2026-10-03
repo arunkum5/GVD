@@ -1,13 +1,18 @@
-import { useState } from 'react'
-import { MOCK_JOB_CARDS } from '@/data/mockData'
+import { useEffect } from 'react'
+import { useDataStore } from '@/store/dataStore'
 import { useNavigate } from 'react-router-dom'
-import { Wrench, CheckCircle2, ChevronRight, AlertCircle } from 'lucide-react'
+import { Wrench, CheckCircle2, ChevronRight, AlertCircle, Loader2 } from 'lucide-react'
 
 export default function TechnicianDashboard() {
   const navigate = useNavigate()
+  const { jobCards, fetchJobCards, isLoading } = useDataStore()
+
+  useEffect(() => {
+    fetchJobCards()
+  }, [fetchJobCards])
   
   // Only show active jobs for technician
-  const activeJobs = MOCK_JOB_CARDS.filter(j => 
+  const activeJobs = jobCards.filter((j: any) => 
     j.status === 'OPEN' || j.status === 'IN_PROGRESS' || j.status === 'QUALITY_CHECK'
   )
 
@@ -59,7 +64,14 @@ export default function TechnicianDashboard() {
           </div>
         ))}
 
-        {activeJobs.length === 0 && (
+        {isLoading && (
+          <div className="col-span-full bg-card border border-border rounded-xl p-12 text-center text-muted-foreground flex flex-col items-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
+            <p>Loading your workspace...</p>
+          </div>
+        )}
+
+        {!isLoading && activeJobs.length === 0 && (
           <div className="col-span-full bg-card border border-dashed rounded-xl p-12 text-center text-muted-foreground">
             <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-green-500/50" />
             <h3 className="text-lg font-medium text-foreground">All caught up!</h3>
