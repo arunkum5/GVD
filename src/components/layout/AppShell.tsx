@@ -1,6 +1,6 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
-import { LogOut, Home, ClipboardList, Settings, PenTool, User as UserIcon, LayoutDashboard, QrCode, MapPin } from 'lucide-react'
+import { LogOut, Home, ClipboardList, Settings, PenTool, User as UserIcon, LayoutDashboard, QrCode, MapPin, Phone, MessageCircle } from 'lucide-react'
 import { UserRole } from '@/types'
 
 export default function AppShell() {
@@ -20,7 +20,9 @@ export default function AppShell() {
       case 'CUSTOMER':
         return [
           { label: 'Portal', path: '/customer', icon: <Home className="h-5 w-5" /> },
-          { label: 'Location', path: '/location', icon: <MapPin className="h-5 w-5" /> }
+          { label: 'Location', path: '/location', icon: <MapPin className="h-5 w-5" /> },
+          { label: 'Call', path: 'call', href: 'tel:9342851128', icon: <Phone className="h-5 w-5" /> },
+          { label: 'WhatsApp', path: 'wa', href: 'https://wa.me/919342851128', icon: <MessageCircle className="h-5 w-5" /> }
         ]
       case 'STAFF':
         return [
@@ -60,15 +62,26 @@ export default function AppShell() {
         <nav className="flex-1 px-4 space-y-2">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path
+            const className = `w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+              isActive
+                ? 'bg-primary/10 text-primary font-medium'
+                : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+            }`
+
+            if (item.href) {
+              return (
+                <a key={item.path} href={item.href} target="_blank" rel="noreferrer" className={className}>
+                  {item.icon}
+                  <span>{item.label}</span>
+                </a>
+              )
+            }
+
             return (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                }`}
+                className={className}
               >
                 {item.icon}
                 <span>{item.label}</span>
@@ -119,13 +132,24 @@ export default function AppShell() {
         <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border flex justify-around p-2 safe-bottom z-50">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path
+            const className = `flex flex-col items-center p-2 rounded-lg min-w-[64px] ${
+              isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+            }`
+
+            if (item.href) {
+              return (
+                <a key={item.path} href={item.href} target="_blank" rel="noreferrer" className={className}>
+                  {item.icon}
+                  <span className="text-[10px] mt-1 font-medium">{item.label}</span>
+                </a>
+              )
+            }
+
             return (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`flex flex-col items-center p-2 rounded-lg min-w-[64px] ${
-                  isActive ? 'text-primary' : 'text-muted-foreground'
-                }`}
+                className={className}
               >
                 {item.icon}
                 <span className="text-[10px] mt-1 font-medium">{item.label}</span>

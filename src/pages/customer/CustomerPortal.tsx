@@ -116,23 +116,6 @@ export default function CustomerPortal() {
           ))}
         </div>
       </div>
-      {/* Floating Action Buttons */}
-      <div className="fixed bottom-32 right-6 flex flex-col gap-3 z-50">
-        <a 
-          href={`https://wa.me/${WORKSHOP.phone.replace(/[^0-9]/g, '')}`} 
-          target="_blank" 
-          rel="noreferrer"
-          className="h-12 w-12 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg hover:-translate-y-1 transition-transform"
-        >
-          <MessageCircle className="h-6 w-6" />
-        </a>
-        <a 
-          href={`tel:${WORKSHOP.phone.replace(/[^0-9]/g, '')}`} 
-          className="h-12 w-12 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg hover:-translate-y-1 transition-transform"
-        >
-          <Phone className="h-6 w-6" />
-        </a>
-      </div>
     </div>
   )
 }
