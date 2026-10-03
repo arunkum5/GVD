@@ -38,6 +38,17 @@
   html { scroll-behavior: smooth; }
 }
 
+@keyframes driveAndSettle {
+  0% { transform: translateX(-150vw) skewX(-15deg); }
+  45% { transform: translateX(50vw) skewX(10deg); }
+  65% { transform: translateX(50vw) skewX(0deg); }
+  100% { transform: translateX(0) skewX(0); }
+}
+
+.animate-drive {
+  animation: driveAndSettle 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
 @layer utilities {
   .glass {
     background: rgba(255,255,255,0.05);

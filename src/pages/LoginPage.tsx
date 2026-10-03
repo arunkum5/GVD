@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { UserRole } from '@/types'
@@ -35,11 +35,29 @@ export default function LoginPage() {
     }
   }
 
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  useEffect(() => {
+    audioRef.current = new Audio('/engine.ogg')
+    // Attempt autoplay
+    const playPromise = audioRef.current.play()
+    if (playPromise !== undefined) {
+      playPromise.catch(e => console.log('Browser blocked autoplay:', e))
+    }
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      }
+    }
+  }, [])
+
   return (
-    <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4 overflow-hidden">
+      <div className="w-full max-w-md space-y-8 z-10">
         <div className="text-center">
-          <div className="mx-auto h-40 w-auto flex items-center justify-center mb-4 animate-fade-in">
+          <div className="mx-auto h-40 w-auto flex items-center justify-center mb-4 animate-drive">
             <img src="/logo.webp" alt="GVD Auto World" className="h-full object-contain drop-shadow-xl" />
           </div>
         </div>
