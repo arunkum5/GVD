@@ -285,19 +285,40 @@ const getAudioContext = () => {
 }
 
 function RoleCard({ role, icon, label, selected, onClick }: { role: UserRole, icon: React.ReactNode, label: string, selected: boolean, onClick: () => void }) {
+  const getColors = (r: UserRole) => {
+    switch (r) {
+      case 'CUSTOMER': return {
+        base: 'border-blue-500/20 bg-blue-500/5 text-blue-500 hover:bg-blue-500/10 hover:border-blue-500/50',
+        active: 'border-blue-500 bg-gradient-to-br from-blue-500/20 to-blue-500/5 text-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)] scale-105'
+      }
+      case 'STAFF': return {
+        base: 'border-purple-500/20 bg-purple-500/5 text-purple-500 hover:bg-purple-500/10 hover:border-purple-500/50',
+        active: 'border-purple-500 bg-gradient-to-br from-purple-500/20 to-purple-500/5 text-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.3)] scale-105'
+      }
+      case 'TECHNICIAN': return {
+        base: 'border-orange-500/20 bg-orange-500/5 text-orange-500 hover:bg-orange-500/10 hover:border-orange-500/50',
+        active: 'border-orange-500 bg-gradient-to-br from-orange-500/20 to-orange-500/5 text-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.3)] scale-105'
+      }
+      case 'ADMIN': return {
+        base: 'border-rose-500/20 bg-rose-500/5 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/50',
+        active: 'border-rose-500 bg-gradient-to-br from-rose-500/20 to-rose-500/5 text-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.3)] scale-105'
+      }
+    }
+  }
+
+  const colors = getColors(role)
+
   return (
     <div
       onClick={onClick}
-      className={`cursor-pointer p-4 rounded-xl border flex flex-col items-center justify-center space-y-2 transition-all ${
-        selected
-          ? 'border-primary bg-primary/10 text-primary shadow-[0_0_15px_rgba(249,115,22,0.2)]'
-          : 'border-border bg-background text-muted-foreground hover:bg-secondary'
+      className={`cursor-pointer p-5 rounded-2xl border flex flex-col items-center justify-center space-y-3 transition-all duration-300 ease-out ${
+        selected ? colors.active : colors.base
       }`}
     >
-      <div className={selected ? 'text-primary' : 'text-muted-foreground'}>
+      <div className={`transform transition-transform duration-300 ${selected ? 'scale-110 drop-shadow-md' : ''}`}>
         {icon}
       </div>
-      <span className="font-medium">{label}</span>
+      <span className={`font-bold tracking-wide ${selected ? '' : 'opacity-80'}`}>{label}</span>
     </div>
   )
 }
