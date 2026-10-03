@@ -21,35 +21,129 @@ const getAudioContext = () => {
   return globalAudioCtx
 }
 
-  const playEngineSound = () => {
+  const playEngineSound = (role: UserRole) => {
     try {
       const ctx = getAudioContext()
       if (!ctx) return
       
-      // Resume context if browser suspended it
       if (ctx.state === 'suspended') ctx.resume()
 
       const osc = ctx.createOscillator()
+      const filter = ctx.createBiquadFilter()
       const gain = ctx.createGain()
       
-      osc.type = 'sawtooth'
-      osc.frequency.setValueAtTime(40, ctx.currentTime)
-      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.3)
-      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.6)
-      osc.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 1.0)
-      
-      gain.gain.setValueAtTime(0, ctx.currentTime)
-      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.1)
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.2)
-      
-      osc.connect(gain)
+      osc.connect(filter)
+      filter.connect(gain)
       gain.connect(ctx.destination)
       
-      osc.start()
-      osc.stop(ctx.currentTime + 1.2)
+      const now = ctx.currentTime
+      
+      if (role === 'CUSTOMER') {
+        // Smooth Sports Car
+        osc.type = 'sawtooth'
+        filter.type = 'lowpass'
+        filter.frequency.value = 800
+        osc.frequency.setValueAtTime(40, now)
+        osc.frequency.exponentialRampToValueAtTime(200, now + 0.4)
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.8)
+        gain.gain.setValueAtTime(0, now)
+        gain.gain.linearRampToValueAtTime(0.3, now + 0.1)
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0)
+        osc.start(now); osc.stop(now + 1.0)
+      } else if (role === 'STAFF') {
+        // Deep V8 Rumble
+        osc.type = 'square'
+        filter.type = 'lowpass'
+        filter.frequency.value = 400
+        osc.frequency.setValueAtTime(30, now)
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.3)
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.7)
+        gain.gain.setValueAtTime(0, now)
+        gain.gain.linearRampToValueAtTime(0.4, now + 0.1)
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.9)
+        osc.start(now); osc.stop(now + 0.9)
+      } else if (role === 'TECHNICIAN') {
+        // High-pitched Motorcycle Bike
+        osc.type = 'sawtooth'
+        filter.type = 'lowpass'
+        filter.frequency.value = 2000
+        osc.frequency.setValueAtTime(60, now)
+        osc.frequency.exponentialRampToValueAtTime(350, now + 0.2)
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.5)
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.8)
+        gain.gain.setValueAtTime(0, now)
+        gain.gain.linearRampToValueAtTime(0.2, now + 0.1)
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.2)
+        osc.start(now); osc.stop(now + 1.2)
+      } else {
+        // ADMIN: Heavy Diesel Truck
+        osc.type = 'triangle'
+        filter.type = 'lowpass'
+        filter.frequency.value = 300
+        osc.frequency.setValueAtTime(20, now)
+        osc.frequency.exponentialRampToValueAtTime(60, now + 0.5)
+        osc.frequency.exponentialRampToValueAtTime(30, now + 1.2)
+        gain.gain.setValueAtTime(0, now)
+        gain.gain.linearRampToValueAtTime(0.5, now + 0.2)
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.4)
+        osc.start(now); osc.stop(now + 1.4)
+      }
     } catch (e) {
       // Silent catch
     }
+  }
+
+  const playSuccessSound = () => {
+    try {
+      const ctx = getAudioContext()
+      if (!ctx) return
+      if (ctx.state === 'suspended') ctx.resume()
+      
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      
+      const now = ctx.currentTime
+      osc.type = 'sine'
+      // Bright unlock chime (C5 -> E5 -> G5)
+      osc.frequency.setValueAtTime(523.25, now)
+      osc.frequency.setValueAtTime(659.25, now + 0.15)
+      osc.frequency.setValueAtTime(783.99, now + 0.3)
+      
+      gain.gain.setValueAtTime(0, now)
+      gain.gain.linearRampToValueAtTime(0.5, now + 0.05)
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6)
+      
+      osc.start(now)
+      osc.stop(now + 0.6)
+    } catch (e) {}
+  }
+
+  const playErrorSound = () => {
+    try {
+      const ctx = getAudioContext()
+      if (!ctx) return
+      if (ctx.state === 'suspended') ctx.resume()
+      
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      
+      const now = ctx.currentTime
+      osc.type = 'sawtooth'
+      // Harsh error buzz
+      osc.frequency.setValueAtTime(150, now)
+      osc.frequency.linearRampToValueAtTime(100, now + 0.3)
+      
+      gain.gain.setValueAtTime(0, now)
+      gain.gain.linearRampToValueAtTime(0.4, now + 0.05)
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3)
+      
+      osc.start(now)
+      osc.stop(now + 0.3)
+    } catch (e) {}
   }
 
   const handleLogin = (e: React.FormEvent) => {
@@ -66,13 +160,14 @@ const getAudioContext = () => {
       ADMIN: 'admin'
     }
 
-    playEngineSound()
     const result = login(usernameMap[selectedRole], password)
     
     if (result.success) {
+      playSuccessSound()
       toast.success('Login successful')
-      setTimeout(() => navigate('/'), 600) // Slight delay to hear the engine!
+      setTimeout(() => navigate('/'), 600) // Slight delay to hear the sound!
     } else {
+      playErrorSound()
       toast.error(result.error)
     }
   }
@@ -93,28 +188,28 @@ const getAudioContext = () => {
               icon={<User />}
               label="Customer"
               selected={selectedRole === 'CUSTOMER'}
-              onClick={() => { setSelectedRole('CUSTOMER'); playEngineSound(); }}
+              onClick={() => { setSelectedRole('CUSTOMER'); playEngineSound('CUSTOMER'); }}
             />
             <RoleCard
               role="STAFF"
               icon={<Users />}
               label="Advisor"
               selected={selectedRole === 'STAFF'}
-              onClick={() => { setSelectedRole('STAFF'); playEngineSound(); }}
+              onClick={() => { setSelectedRole('STAFF'); playEngineSound('STAFF'); }}
             />
             <RoleCard
               role="TECHNICIAN"
               icon={<Wrench />}
               label="Technician"
               selected={selectedRole === 'TECHNICIAN'}
-              onClick={() => { setSelectedRole('TECHNICIAN'); playEngineSound(); }}
+              onClick={() => { setSelectedRole('TECHNICIAN'); playEngineSound('TECHNICIAN'); }}
             />
             <RoleCard
               role="ADMIN"
               icon={<Shield />}
               label="Admin"
               selected={selectedRole === 'ADMIN'}
-              onClick={() => { setSelectedRole('ADMIN'); playEngineSound(); }}
+              onClick={() => { setSelectedRole('ADMIN'); playEngineSound('ADMIN'); }}
             />
           </div>
 
