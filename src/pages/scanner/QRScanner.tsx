@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { QrCode, Camera } from 'lucide-react'
 import { Html5QrcodeScanner } from 'html5-qrcode'
 import { toast } from 'sonner'
+import { supabase } from '@/lib/supabase'
 
 export default function QRScanner() {
   const [scanResult, setScanResult] = useState<string | null>(null)
@@ -17,14 +18,26 @@ export default function QRScanner() {
     )
 
     scanner.render(
-      (decodedText) => {
+      async (decodedText) => {
         setScanResult(decodedText)
         scanner.clear()
-        toast.success('QR Scanned Successfully')
         
-        // Mock routing based on scan
-        if (decodedText.includes('JC-')) {
-          navigate('/staff/job-cards/1')
+        // Search the live database for this Job Card
+        try {
+          const { data, error } = await supabase
+            .from('job_cards')
+            .select('id')
+            .eq('job_card_number', decodedText.trim())
+            .single()
+            
+          if (data && !error) {
+            toast.success('Job Card Found!')
+            navigate(`/staff/job-cards/${data.id}`)
+          } else {
+            toast.error('Record not found in database')
+          }
+        } catch (err) {
+          toast.error('Database query failed')
         }
       },
       (error) => {
