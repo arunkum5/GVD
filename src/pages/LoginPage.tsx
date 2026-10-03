@@ -43,11 +43,11 @@ const getAudioContext = () => {
         osc.type = 'sawtooth'
         filter.type = 'lowpass'
         filter.frequency.value = 800
-        osc.frequency.setValueAtTime(40, now)
-        osc.frequency.exponentialRampToValueAtTime(200, now + 0.4)
-        osc.frequency.exponentialRampToValueAtTime(100, now + 0.8)
+        osc.frequency.setValueAtTime(50, now)
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.4)
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.8)
         gain.gain.setValueAtTime(0, now)
-        gain.gain.linearRampToValueAtTime(0.3, now + 0.1)
+        gain.gain.linearRampToValueAtTime(0.4, now + 0.1)
         gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0)
         osc.start(now); osc.stop(now + 1.0)
       } else if (role === 'STAFF') {
@@ -55,36 +55,36 @@ const getAudioContext = () => {
         osc.type = 'square'
         filter.type = 'lowpass'
         filter.frequency.value = 400
-        osc.frequency.setValueAtTime(30, now)
-        osc.frequency.exponentialRampToValueAtTime(90, now + 0.3)
-        osc.frequency.exponentialRampToValueAtTime(50, now + 0.7)
+        osc.frequency.setValueAtTime(40, now)
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.3)
+        osc.frequency.exponentialRampToValueAtTime(60, now + 0.7)
         gain.gain.setValueAtTime(0, now)
-        gain.gain.linearRampToValueAtTime(0.4, now + 0.1)
+        gain.gain.linearRampToValueAtTime(0.5, now + 0.1)
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.9)
         osc.start(now); osc.stop(now + 0.9)
       } else if (role === 'TECHNICIAN') {
-        // High-pitched Motorcycle Bike
+        // Aggressive Motorcycle (grittier square wave, audible pitch)
+        osc.type = 'square'
+        filter.type = 'lowpass'
+        filter.frequency.value = 1500
+        osc.frequency.setValueAtTime(50, now)
+        osc.frequency.linearRampToValueAtTime(250, now + 0.2)
+        osc.frequency.linearRampToValueAtTime(150, now + 0.4)
+        osc.frequency.linearRampToValueAtTime(300, now + 0.7)
+        gain.gain.setValueAtTime(0, now)
+        gain.gain.linearRampToValueAtTime(0.3, now + 0.1)
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.0)
+        osc.start(now); osc.stop(now + 1.0)
+      } else {
+        // ADMIN: Heavy Diesel Truck (Sawtooth at 30-80Hz is very audible on phones)
         osc.type = 'sawtooth'
         filter.type = 'lowpass'
-        filter.frequency.value = 2000
-        osc.frequency.setValueAtTime(60, now)
-        osc.frequency.exponentialRampToValueAtTime(350, now + 0.2)
-        osc.frequency.exponentialRampToValueAtTime(150, now + 0.5)
-        osc.frequency.exponentialRampToValueAtTime(400, now + 0.8)
+        filter.frequency.value = 500
+        osc.frequency.setValueAtTime(30, now)
+        osc.frequency.linearRampToValueAtTime(80, now + 0.6)
+        osc.frequency.linearRampToValueAtTime(40, now + 1.2)
         gain.gain.setValueAtTime(0, now)
-        gain.gain.linearRampToValueAtTime(0.2, now + 0.1)
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.2)
-        osc.start(now); osc.stop(now + 1.2)
-      } else {
-        // ADMIN: Heavy Diesel Truck
-        osc.type = 'triangle'
-        filter.type = 'lowpass'
-        filter.frequency.value = 300
-        osc.frequency.setValueAtTime(20, now)
-        osc.frequency.exponentialRampToValueAtTime(60, now + 0.5)
-        osc.frequency.exponentialRampToValueAtTime(30, now + 1.2)
-        gain.gain.setValueAtTime(0, now)
-        gain.gain.linearRampToValueAtTime(0.5, now + 0.2)
+        gain.gain.linearRampToValueAtTime(0.6, now + 0.2)
         gain.gain.exponentialRampToValueAtTime(0.01, now + 1.4)
         osc.start(now); osc.stop(now + 1.4)
       }
