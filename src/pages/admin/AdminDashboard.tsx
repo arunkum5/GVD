@@ -1,9 +1,16 @@
-import { MOCK_JOB_CARDS } from '@/data/mockData'
+import { useEffect } from 'react'
 import { TrendingUp, Users, Wrench, IndianRupee, BellRing } from 'lucide-react'
+import { useDataStore } from '@/store/dataStore'
 
 export default function AdminDashboard() {
-  const todayRevenue = MOCK_JOB_CARDS.reduce((sum, job) => sum + (job.advancePaid || 0), 0)
-  const pendingAmount = MOCK_JOB_CARDS.reduce((sum, job) => sum + (job.balanceAmount || 0), 0)
+  const { jobCards, fetchJobCards } = useDataStore()
+
+  useEffect(() => {
+    fetchJobCards()
+  }, [fetchJobCards])
+
+  const todayRevenue = jobCards.reduce((sum: number, job: any) => sum + (job.advancePaid || 0), 0)
+  const pendingAmount = jobCards.reduce((sum: number, job: any) => sum + (job.balanceAmount || 0), 0)
   
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -28,7 +35,7 @@ export default function AdminDashboard() {
         />
         <KpiCard 
           title="Active Jobs" 
-          value={MOCK_JOB_CARDS.length.toString()} 
+          value={jobCards.length.toString()} 
           icon={<Wrench className="h-5 w-5 text-blue-500" />} 
           trend="4 ready for delivery" 
         />

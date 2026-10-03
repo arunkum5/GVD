@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useDataStore } from '@/store/dataStore'
-import { Search, Plus, AlertTriangle, Upload } from 'lucide-react'
+import { Search, Plus, AlertTriangle, Upload, X, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const { inventory, fetchInventory } = useDataStore()
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export default function InventoryPage() {
           <button className="flex items-center gap-2 border border-border bg-card px-4 py-2 rounded-lg font-medium hover:bg-secondary transition">
             <Upload className="h-4 w-4" /> Import Excel
           </button>
-          <button className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition">
+          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition">
             <Plus className="h-5 w-5" /> Add Part
           </button>
         </div>
@@ -85,6 +87,142 @@ export default function InventoryPage() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {isModalOpen && <AddInventoryModal onClose={() => setIsModalOpen(false)} />}
+    </div>
+  )
+}
+
+function AddInventoryModal({ onClose }: { onClose: () => void }) {
+  const { addInventoryItem } = useDataStore()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState({
+    partName: '',
+    partNumber: '',
+    category: 'SPARE',
+    unitPrice: '',
+    stockQuantity: '',
+    minThresholdAlert: '5'
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!formData.partName || !formData.unitPrice || !formData.stockQuantity) {
+      return toast.error('Please fill required fields')
+    }
+
+    setIsSubmitting(true)
+    try {
+      await addInventoryItem({
+        partName: formData.partName,
+        partNumber: formData.partNumber || `SKU-${Date.now()}`,
+        category: formData.category,
+        unitPrice: parseFloat(formData.unitPrice),
+        stockQuantity: parseInt(formData.stockQuantity),
+        minThresholdAlert: parseInt(formData.minThresholdAlert)
+      })
+      toast.success('Part added to inventory')
+      onClose()
+    } catch (err: any) {
+      toast.error('Failed to add part')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-card w-full max-w-md rounded-2xl shadow-xl border overflow-hidden animate-slide-up">
+        <div className="p-4 border-b border-border flex justify-between items-center bg-secondary/30">
+          <h2 className="font-bold text-lg">Add New Part</h2>
+          <button onClick={onClose} className="p-1 hover:bg-black/10 rounded-full transition">
+            <X className="h-5 w-5 text-muted-foreground" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-muted-foreground">Part Name *</label>
+            <input 
+              required
+              autoFocus
+              className="w-full p-2.5 bg-input border border-border rounded-lg"
+              value={formData.partName}
+              onChange={e => setFormData(f => ({ ...f, partName: e.target.value }))}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-muted-foreground">Part/SKU Number</label>
+            <input 
+              className="w-full p-2.5 bg-input border border-border rounded-lg"
+              value={formData.partNumber}
+              onChange={e => setFormData(f => ({ ...f, partNumber: e.target.value }))}
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-muted-foreground">Category</label>
+              <select 
+                className="w-full p-2.5 bg-input border border-border rounded-lg"
+                value={formData.category}
+                onChange={e => setFormData(f => ({ ...f, category: e.target.value }))}
+              >
+                <option value="SPARE">Spare Part</option>
+                <option value="LABOUR">Labour / Service</option>
+                <option value="LUBE">Lubes & Fluids</option>
+                <option value="DETAILING">Detailing</option>
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-muted-foreground">Unit Price (₹) *</label>
+              <input 
+                required
+                type="number"
+                min="0"
+                step="0.01"
+                className="w-full p-2.5 bg-input border border-border rounded-lg"
+                value={formData.unitPrice}
+                onChange={e => setFormData(f => ({ ...f, unitPrice: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-muted-foreground">Initial Stock *</label>
+              <input 
+                required
+                type="number"
+                min="0"
+                className="w-full p-2.5 bg-input border border-border rounded-lg"
+                value={formData.stockQuantity}
+                onChange={e => setFormData(f => ({ ...f, stockQuantity: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-muted-foreground">Low Alert At</label>
+              <input 
+                required
+                type="number"
+                min="0"
+                className="w-full p-2.5 bg-input border border-border rounded-lg"
+                value={formData.minThresholdAlert}
+                onChange={e => setFormData(f => ({ ...f, minThresholdAlert: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="w-full py-3 bg-primary text-primary-foreground font-bold rounded-xl mt-6 hover:bg-primary/90 flex justify-center items-center gap-2"
+          >
+            {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Plus className="h-5 w-5" /> Save Part</>}
+          </button>
+        </form>
       </div>
     </div>
   )

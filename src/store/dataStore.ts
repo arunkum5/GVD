@@ -13,6 +13,7 @@ interface DataState {
   updateJobCardStatus: (id: string, status: JobCard['status']) => Promise<void>
   addJobItem: (jobCardId: string, item: { name: string, category: string, unitPrice: number, quantity: number, total: number }) => Promise<void>
   saveInspection: (jobCardId: string, inspections: any[]) => Promise<void>
+  addInventoryItem: (item: any) => Promise<void>
 }
 
 export const useDataStore = create<DataState>((set, get) => ({
@@ -111,6 +112,27 @@ export const useDataStore = create<DataState>((set, get) => ({
       set({ inventory: formattedData, isLoading: false })
     } catch (err: any) {
       set({ error: err.message, isLoading: false })
+    }
+  },
+
+  addInventoryItem: async (item) => {
+    set({ isLoading: true })
+    try {
+      const { error } = await supabase.from('inventory').insert([{
+        part_name: item.partName,
+        part_number: item.partNumber,
+        category: item.category,
+        unit_price: item.unitPrice,
+        stock_quantity: item.stockQuantity,
+        min_threshold_alert: item.minThresholdAlert
+      }])
+      if (error) throw error
+      
+      await get().fetchInventory()
+    } catch (err: any) {
+      console.error('Failed to add inventory:', err)
+      set({ error: err.message, isLoading: false })
+      throw err
     }
   },
 
