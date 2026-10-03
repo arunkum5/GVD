@@ -5,7 +5,9 @@ import 'leaflet/dist/leaflet.css'
 
 // Fix leaflet icon issue
 import L from 'leaflet'
+// @ts-ignore
 import icon from 'leaflet/dist/images/marker-icon.png'
+// @ts-ignore
 import iconShadow from 'leaflet/dist/images/marker-shadow.png'
 
 let DefaultIcon = L.icon({
