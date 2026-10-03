@@ -68,6 +68,7 @@ export interface JobCard {
   isSmsAlertEnabled: boolean
   isPaidOnline: boolean
   items: JobCardItem[]
+  inspections?: any[]
   createdAt: string
   updatedAt: string
 }
