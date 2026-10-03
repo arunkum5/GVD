@@ -54,7 +54,7 @@ export default function AppShell() {
       <aside className="hidden md:flex w-64 flex-col bg-card border-r border-border">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-primary flex items-center gap-2">
-            <img src="/logo.png" alt="GVD Auto World" className="h-8 w-8 object-contain" />
+            <img src="/logo.jpg" alt="GVD Auto World" className="h-8 w-8 object-contain" />
             GVD Auto
           </h1>
         </div>
@@ -115,7 +115,7 @@ export default function AppShell() {
         {/* Mobile Header */}
         <header className="md:hidden flex items-center justify-between p-4 bg-card border-b border-border">
           <h1 className="text-xl font-bold text-primary flex items-center gap-2">
-            <img src="/logo.png" alt="GVD Auto World" className="h-8 w-8 object-contain" />
+            <img src="/logo.jpg" alt="GVD Auto World" className="h-8 w-8 object-contain" />
             GVD Auto
           </h1>
           <button onClick={handleLogout} className="text-muted-foreground">
