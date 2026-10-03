@@ -97,11 +97,33 @@ export const useDataStore = create<DataState>((set, get) => ({
   addJobCard: async (jobCard) => {
     set({ isLoading: true })
     try {
-      const { error } = await supabase.from('job_cards').insert([jobCard])
+      const dbPayload = {
+        job_card_number: jobCard.jobCardNumber,
+        customer_name: jobCard.customerName,
+        customer_mobile: jobCard.customerMobile,
+        vehicle_number: jobCard.vehicleNumber,
+        vehicle_type: jobCard.vehicleType,
+        make: jobCard.make,
+        model: jobCard.model,
+        variant: jobCard.variant,
+        odometer_km: jobCard.odometerKm,
+        fuel_level_percent: jobCard.fuelLevelPercent,
+        accessories_notes: jobCard.accessoriesNotes,
+        customer_voice: jobCard.customerVoice,
+        dent_notes: jobCard.dentNotes,
+        dent_photos: jobCard.dentPhotos,
+        status: 'OPEN'
+      }
+
+      const { data, error } = await supabase.from('job_cards').insert([dbPayload]).select().single()
       if (error) throw error
+
+      // Refresh the job cards list to include the new one with all joined data
       await get().fetchJobCards()
     } catch (err: any) {
+      console.error('Failed to create job card:', err)
       set({ error: err.message, isLoading: false })
+      throw err
     }
   },
 

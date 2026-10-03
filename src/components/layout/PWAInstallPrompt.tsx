@@ -52,13 +52,13 @@ export default function PWAInstallPrompt() {
   if (!deferredPrompt || isDismissed) return null
 
   return (
-    <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-sm animate-slide-up">
-      <div className="bg-primary/95 text-primary-foreground backdrop-blur-md p-4 rounded-xl shadow-[0_0_20px_rgba(249,115,22,0.4)] border border-primary/20 flex items-center justify-between gap-4">
-        <span className="font-bold text-sm ml-1">Install App</span>
-        <div className="flex items-center gap-2">
+    <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-[100] w-auto animate-slide-up">
+      <div className="bg-primary/95 text-primary-foreground backdrop-blur-md py-2 px-4 rounded-full shadow-[0_0_20px_rgba(249,115,22,0.4)] border border-primary/20 flex items-center justify-center gap-3">
+        <span className="font-bold text-xs ml-1">Install App</span>
+        <div className="flex items-center gap-1">
           <button 
             onClick={handleInstallClick}
-            className="bg-white text-primary p-2 rounded-lg text-sm font-bold shadow-sm hover:bg-orange-50 transition"
+            className="bg-white text-primary p-1.5 rounded-full text-sm font-bold shadow-sm hover:bg-orange-50 transition"
             title="Install App"
           >
             <Download className="h-5 w-5" />
