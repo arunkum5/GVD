@@ -36,15 +36,10 @@ export default function LoginPage() {
   }
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [hasStarted, setHasStarted] = useState(false)
 
   useEffect(() => {
     audioRef.current = new Audio('/engine.ogg')
-    // Attempt autoplay
-    const playPromise = audioRef.current.play()
-    if (playPromise !== undefined) {
-      playPromise.catch(e => console.log('Browser blocked autoplay:', e))
-    }
-    
     return () => {
       if (audioRef.current) {
         audioRef.current.pause()
@@ -52,6 +47,27 @@ export default function LoginPage() {
       }
     }
   }, [])
+
+  const handleStart = () => {
+    if (audioRef.current) {
+      audioRef.current.play().catch(e => console.log('Audio error:', e))
+    }
+    setHasStarted(true)
+  }
+
+  if (!hasStarted) {
+    return (
+      <div 
+        className="min-h-screen bg-background flex flex-col justify-center items-center p-4 cursor-pointer" 
+        onClick={handleStart}
+      >
+        <div className="mx-auto h-48 w-auto flex items-center justify-center mb-8">
+          <img src="/logo.webp" alt="GVD Auto World" className="h-full object-contain drop-shadow-2xl animate-pulse" />
+        </div>
+        <p className="text-muted-foreground animate-bounce font-medium mt-12 tracking-widest uppercase">Tap anywhere to enter</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4 overflow-hidden">
